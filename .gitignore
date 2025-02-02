@@ -1,0 +1,4 @@
+/.venv
+/src/main/minigo/parser/.antlr
+*.Identifier
+/target
