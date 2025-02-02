@@ -24,20 +24,25 @@ options{
 	language=Python3;
 }
 
-program  : decl+ EOF ;
 
-decl: funcdecl | vardecl  ;
-
-vardecl: 'var' ID 'int' ';' ;
-
-funcdecl: 'func' ID '(' ')' '{' '}' ';' ;
-
-ID: [a-z]+;
-
-NL: '\n' -> skip; //skip newlines
-
-WS : [ \t\r]+ -> skip ; // skip spaces, tabs 
+// LEXER RULES
+SINGLE_LINE_COMMENT : '//' ~[\r\n]* -> skip ;
+MULTI_LIME_COMMENT  :  '/*' .* '*/' -> skip;
+// blanks, tabs, formfeeds, carriage returns
+WHITESPACE          : [ \t\f\r]+    -> skip ;
+NEWLINE             : '\n'          -> skip ;
 
 ERROR_CHAR: .;
 ILLEGAL_ESCAPE:.;
 UNCLOSE_STRING:.;
+// -------------------------------------------
+
+
+// PARSER RULES
+program             : declaration+ EOF;
+
+declaration         : constant_declaration
+                    | variable_declaration
+                    | type_declaration      // struct or interface
+                    | function_declaration;
+// -------------------------------------------

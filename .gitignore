@@ -2,3 +2,4 @@
 /src/main/minigo/parser/.antlr
 *.Identifier
 /target
+/my-test
