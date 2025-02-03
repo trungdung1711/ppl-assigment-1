@@ -1,1 +1,1 @@
-ab,ErrorToken ?
+42,<EOF>
