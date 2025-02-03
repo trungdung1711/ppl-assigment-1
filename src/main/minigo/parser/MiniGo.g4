@@ -105,14 +105,35 @@ NOT                     : '!' ;
     - ,
     - ;
  */
-LP                      : '(';
-RP                      : ')';
-LB                      : '[';
-RB                      : ']';
-LCB                     : '{';
-RCB                     : '}';
-COMMA                   : ',';
-SEMICOLON               : ';';
+LP                      : '(' ;
+RP                      : ')' ;
+LB                      : '[' ;
+RB                      : ']' ;
+LCB                     : '{' ;
+RCB                     : '}' ;
+COMMA                   : ',' ;
+SEMICOLON               : ';' ;
+
+/*
+    literals:
+    - integer literal
+        + decimal
+        + binary
+        + octal
+        + hexa
+    - floating-point literal
+    - string literal
+    - boolean literal
+    - nil literal
+*/
+DECIMAL_INTEGER         : '0' | [1-9] [0-9]* ;
+BINARY_INTEGER          : '0' [bB] [0-1]+ ;
+OCTAL_INTEGER           : '0' [oO] [0-7]+ ;
+HEXA_INTEGER            : '0' [xX] [0-9a-fA-F]+ ;
+FLOATING_POINT          : INTEGER DOT FRACTION? EXPONENT? ;
+    fragment INTEGER        : DIGIT+ ;
+    fragment FRACTION       : DIGIT+ ;
+    fragment EXPONENT       : [eE] [+-]? DIGIT+ ;
 
 /* 
     identifiers:
@@ -122,10 +143,10 @@ SEMICOLON               : ';';
     - function names
     - other user-defined elements
 */
-fragment LETTER     : [a-zA-Z] ;
-fragment DIGIT      : [0-9] ;
-fragment UNDERSCORE : '_' ;
-ID                  : (LETTER | UNDERSCORE) (LETTER | DIGIT | UNDERSCORE)*;
+ID                     : (LETTER | UNDERSCORE) (LETTER | DIGIT | UNDERSCORE)*;
+    fragment LETTER         : [a-zA-Z] ;
+    fragment DIGIT          : [0-9] ;
+    fragment UNDERSCORE     : '_' ;
 
 // Comments
 SINGLE_LINE_COMMENT : '//' ~[\r\n]* -> skip ;
