@@ -62,10 +62,13 @@ UNCLOSE_STRING:.;
 
 
 // PARSER RULES
-program             : declaration+ EOF;
+// program             : declaration+ EOF;
 
-declaration         : constant_declaration
-                    | variable_declaration
-                    | type_declaration      // struct or interface
-                    | function_declaration;
+// declaration         : constant_declaration
+//                     | variable_declaration
+//                     | type_declaration      // struct or interface
+//                     | function_declaration;
+
+// test only identifiers
+program                : ID+ EOF;
 // -------------------------------------------

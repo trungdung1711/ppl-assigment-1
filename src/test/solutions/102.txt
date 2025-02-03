@@ -1,1 +1,1 @@
-ab,ErrorToken ?
+Variable,<EOF>
