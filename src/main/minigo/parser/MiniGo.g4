@@ -136,6 +136,8 @@ FLOATING_POINT          : INTEGER DOT FRACTION? EXPONENT? ;
     fragment EXPONENT           : [eE] [+-]? DIGIT+ ;
 STRING_LITERAL          : '"' (~["\\] | ESCAPE_SEQUENCE)* '"';
     fragment ESCAPE_SEQUENCE    : '\\' [ntr"\\];
+// BOOLEAN_LITERAL         : TRUE | FALSE ;
+// NIL_LITERAL             : NIL ;
 /* 
     identifiers:
     - variable names
