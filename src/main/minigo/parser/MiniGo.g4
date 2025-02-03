@@ -126,7 +126,7 @@ SEMICOLON               : ';' ;
     - boolean literal
     - nil literal
 */
-DECIMAL_INTEGER         : '0' | [1-9] [0-9]* ;
+DECIMAL_INTEGER         : '0' | [1-9] DIGIT* ;
 BINARY_INTEGER          : '0' [bB] [0-1]+ ;
 OCTAL_INTEGER           : '0' [oO] [0-7]+ ;
 HEXA_INTEGER            : '0' [xX] [0-9a-fA-F]+ ;
@@ -167,10 +167,29 @@ UNCLOSE_STRING:.;
 
 
 // PARSER RULES
-program             : declaration+ EOF;
+program             : literal+ EOF;
+literal             : integer_literal
+                    | floating_point_literal
+                    | string_literal
+                    | boolean_literal
+                    | nil_literal;
 
-declaration         : constant_declaration
-                    | variable_declaration
-                    | type_declaration      // struct or interface
-                    | function_declaration;
+integer_literal     : DECIMAL_INTEGER
+                    | BINARY_INTEGER
+                    | OCTAL_INTEGER
+                    | HEXA_INTEGER;
+
+floating_point_literal : FLOATING_POINT;
+
+string_literal      : STRING_LITERAL;
+
+boolean_literal     : TRUE
+                    | FALSE;
+
+nil_literal         : NIL;
+
+// declaration         : constant_declaration
+//                     | variable_declaration
+//                     | type_declaration      // struct or interface
+//                     | function_declaration;
 // -------------------------------------------

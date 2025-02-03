@@ -1,1 +1,1 @@
-Error on line 1 col 5: int
+Error on line 1 col 1: var
