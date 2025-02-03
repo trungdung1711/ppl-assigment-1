@@ -131,10 +131,11 @@ BINARY_INTEGER          : '0' [bB] [0-1]+ ;
 OCTAL_INTEGER           : '0' [oO] [0-7]+ ;
 HEXA_INTEGER            : '0' [xX] [0-9a-fA-F]+ ;
 FLOATING_POINT          : INTEGER DOT FRACTION? EXPONENT? ;
-    fragment INTEGER        : DIGIT+ ;
-    fragment FRACTION       : DIGIT+ ;
-    fragment EXPONENT       : [eE] [+-]? DIGIT+ ;
-
+    fragment INTEGER            : DIGIT+ ;
+    fragment FRACTION           : DIGIT+ ;
+    fragment EXPONENT           : [eE] [+-]? DIGIT+ ;
+STRING_LITERAL          : '"' (~["\\] | ESCAPE_SEQUENCE)* '"';
+    fragment ESCAPE_SEQUENCE    : '\\' [ntr"\\];
 /* 
     identifiers:
     - variable names
