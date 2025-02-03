@@ -26,9 +26,32 @@ options{
 
 
 // LEXER RULES
+
+// TOKENS
+/* 
+    - identifiers, 
+    - keywords, 
+    - operators, 
+    - separators, 
+    - literals
+*/
+
+/* 
+    identifiers:
+    - variable names
+    - constant names
+    - type names
+    - function names
+    - other user-defined elements
+*/
+ID                  : [a-zA-Z_] [a-zA-Z0-9_]*;
+
+
 SINGLE_LINE_COMMENT : '//' ~[\r\n]* -> skip ;
-MULTI_LIME_COMMENT  :  '/*' .* '*/' -> skip;
-// blanks, tabs, formfeeds, carriage returns
+
+MULTI_LIME_COMMENT  :  '/*' (MULTI_LIME_COMMENT | ~[/*])*  '*/' -> skip;
+
+// blanks, tabs, formfeeds, carriage returns and newlines
 WHITESPACE          : [ \t\f\r]+    -> skip ;
 NEWLINE             : '\n'          -> skip ;
 
