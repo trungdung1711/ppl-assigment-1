@@ -3,3 +3,5 @@
 *.Identifier
 /target
 /my-test
+/src/test/solutions
+/src/test/testcases

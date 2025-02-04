@@ -173,4 +173,45 @@ declaration         : constant_declaration
                     | variable_declaration
                     | type_declaration      // struct or interface
                     | function_declaration;
+
+statement           : variable_declaration
+                    | constant_declaration
+                    | assignment_statement
+                    | if_statement
+                    | for_statement
+                    | break_statement
+                    | continue_statement
+                    | call_statement
+                    | return_statement;
+    variable_declaration    : VAR variable_name type? initialisation? statement_end;
+        variable_name           : ID;
+        type                    : primitive_type
+                                | composit_type
+                                | array_type;
+            primitive_type          : INT
+                                    | FLOAT
+                                    | BOOLEAN
+                                    | STRING;
+            composit_type           : ;
+            array_type              : dimension_list (primitive_type | composit_type);
+                dimension_list          : dimension dimension_list | dimension;
+                    dimension              : LB ( integer_literal | constant ) RB;
+                        integer_literal         : DECIMAL_INTEGER
+                                                | BINARY_INTEGER
+                                                | OCTAL_INTEGER
+                                                | HEXA_INTEGER;
+                        constant                : ;
+        initialisation          : ASSIGNMENT expression; // value must be computable at compile time
+            expression              : ;
+        statement_end       : SEMICOLON | NEWLINE;
+    constant_declaration    : CONST const_name ASSIGNMENT value statement_end;
+        const_name              : ID;
+        value                   : (literal_constant | expression); // value must be computable at compile time
+            literal_constant        : integer_literal
+                                    | FLOATING_POINT
+                                    | STRING_LITERAL
+                                    | boolean_literal;
+                boolean_literal         : TRUE
+                                        | FALSE;
+    
 // -------------------------------------------
