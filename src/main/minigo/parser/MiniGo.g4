@@ -81,7 +81,8 @@ SUB_ASS                 : '-=' ;
 MUL_ASS                 : '*=' ;
 DIV_ASS                 : '/=' ;
 MOD_ASS                 : '%=' ;
-EQUALITY                : '==' ;
+ASS                     : ':=' ;
+DOUBLE_EQUAL            : '==' ;
 NOT_EQUAL               : '!=' ;
 LESS_THAN_OR_EQUAL      : '<=' ;
 GREATER_THAN_OR_EQUAL   : '>=' ;
@@ -91,7 +92,7 @@ SUB                     : '-' ;
 MUL                     : '*' ;
 DIV                     : '/' ;
 MOD                     : '%' ;
-ASSIGNMENT              : '=' ;
+EQUAL                   : '=' ;
 LESS_THAN               : '<' ;
 GREATER_THAN            : '>' ;
 DOT                     : '.' ;
@@ -192,7 +193,6 @@ statement           : variable_declaration
                                     | FLOAT
                                     | BOOLEAN
                                     | STRING;
-            composit_type           : ;
             array_type              : dimension_list (primitive_type | composit_type);
                 dimension_list          : dimension dimension_list | dimension;
                     dimension              : LB ( integer_literal | constant ) RB;
@@ -201,10 +201,9 @@ statement           : variable_declaration
                                                 | OCTAL_INTEGER
                                                 | HEXA_INTEGER;
                         constant                : ;
-        initialisation          : ASSIGNMENT expression; // value must be computable at compile time
-            expression              : ;
+        initialisation          : EQUAL expression; // value must be computable at compile time
         statement_end       : SEMICOLON | NEWLINE;
-    constant_declaration    : CONST const_name ASSIGNMENT value statement_end;
+    constant_declaration    : CONST const_name EQUAL value statement_end;
         const_name              : ID;
         value                   : (literal_constant | expression); // value must be computable at compile time
             literal_constant        : integer_literal
@@ -213,5 +212,29 @@ statement           : variable_declaration
                                     | boolean_literal;
                 boolean_literal         : TRUE
                                         | FALSE;
-    
+    assignment_statement    : lhs assignment_operator rhs statement_end;
+        lhs                     : scalar_variable
+                                | array_element_access
+                                | struct_field_access;
+        assignment_operator     : ASS
+                                | ADD_ASS
+                                | SUB_ASS
+                                | MUL_ASS
+                                | DIV_ASS
+                                | MOD_ASS;
+        rhs                     : expression;   // value must be compatible with the type of lhs
+    if_statement            : IF LP boolean_expression RP block else_clause?;
+        else_clause             : else_if_clause
+                                | ELSE block;
+            else_if_clause          : ELSE if_statement;
+
+
+
+/*
+    what semantic analysis do, not the parser's job: 
+        - scope
+        - type compatible
+        - operation is allowed for a type
+        - assignment but not declaration -> add to the symbol table
+ */
 // -------------------------------------------
