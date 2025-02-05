@@ -168,6 +168,7 @@ UNCLOSE_STRING:.;
 
 
 // PARSER RULES
+// Write the grammar using BNF not EBNF
 program             : declaration+ EOF;
 
 declaration         : constant_declaration
@@ -184,7 +185,11 @@ statement           : variable_declaration
                     | continue_statement
                     | call_statement
                     | return_statement;
-    variable_declaration    : VAR variable_name type? initialisation? statement_end;
+    // variable_declaration    : VAR variable_name type? initialisation? statement_end;
+    varianle_declaration    : VAR variable_name type initialisation statement_end
+                            | VAR variable_name type                statement_end
+                            | VAR variable_name      initialisation statement_end
+                            | VAR variable_name                     statement_end;
         variable_name           : ID;
         type                    : primitive_type
                                 | composit_type
@@ -223,10 +228,15 @@ statement           : variable_declaration
                                 | DIV_ASS
                                 | MOD_ASS;
         rhs                     : expression;   // value must be compatible with the type of lhs
-    if_statement            : IF LP boolean_expression RP block else_clause?;
-        else_clause             : else_if_clause
-                                | ELSE block;
-            else_if_clause          : ELSE if_statement;
+    // How about the statement_end which enforces the ending of the statement ???
+    if_statement            : IF LP boolean_expression RP block
+                            | IF LP boolean_expression RP block              else 
+                            | IF LP boolean_expression RP block else_if_list
+                            | IF LP boolean_expression RP block else_if_list else;
+        else_if_list            : else_if else_if_list | else_if ;
+            else_if                 : ELSE IF LP boolean_expression RP block;
+        else                : ELSE block;
+    
 
 
 
