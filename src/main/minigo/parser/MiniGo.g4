@@ -169,12 +169,69 @@ UNCLOSE_STRING:.;
 
 // PARSER RULES
 // Write the grammar using BNF not EBNF
-program             : declaration+ EOF;
+program             : declaration+ EOF
+                    ;
 
 declaration         : constant_declaration
                     | variable_declaration
                     | type_declaration      // struct or interface
-                    | function_declaration;
+                    | function_declaration
+                    ;
+    type_declaration    : struct_declaration
+                        | interface_declaration
+                        ;
+        struct_declaration  : TYPE struct_name STRUCT LCB property_declaration_list RCB statement_end
+                            ;
+            struct_name             : ID
+                                    ;
+            property_declaration_list   : property_declaration property_declaration_list
+                                        | property_declaration
+                                        ;
+                property_declaration        : property_name type statement_end
+                                            ;
+                    property_name               : ID
+                                                ;
+        interface_declaration   : TYPE interface_name INTERFACE LCB list RCB
+                                ;
+    function_declaration: function_definition
+                        ;
+        function_definition : normal_function_definition
+                            | method_definition
+                            ;
+            normal_function_definition  : function_header function_body 
+                                        ;
+                function_header             : FUNC function_name LP parameter_list RP type
+                                            | FUNC function_name LP parameter_list RP
+                                            ;
+                    function_name               : ID
+                                                ;
+                    parameter_list              : parameter_prime
+                                                | ;
+                        parameter_prime             : parameter COMMA parameter_prime
+                                                    | parameter
+                                                    ;
+                            // cause ambiguity, but solved based on ANTLR ordering rule
+                            parameter                   : name_type
+                                                        | same_type_list
+                                                        ;
+                                same_type_list          : name_list type
+                                                        ;
+                                    name_list               : name COMMA name_list
+                                                            | name
+                                                            ;
+                                        name                    : ID
+                                                                ;
+                                name_type                   : name type
+                                                                ;
+                function_body                   : block
+                                                ;
+            method_definition           : method_header function_body
+                                        ;
+                method_header               : FUNC LP receiver RP function_name LP parameter_list RP type
+                                            | FUNC LP receiver RP function_name LP parameter_list RP
+                                            ;
+                    receiver                    : name composite_type
+                                                ; 
 
 statement           : variable_declaration
                     | constant_declaration
@@ -184,33 +241,50 @@ statement           : variable_declaration
                     | break_statement
                     | continue_statement
                     | call_statement
-                    | return_statement;
+                    | return_statement
+                    ;
     // variable_declaration    : VAR variable_name type? initialisation? statement_end;
-    varianle_declaration    : VAR variable_name type initialisation statement_end
+    variable_declaration    : VAR variable_name type initialisation statement_end
                             | VAR variable_name type                statement_end
                             | VAR variable_name      initialisation statement_end
-                            | VAR variable_name                     statement_end;
-        variable_name           : ID;
-        type                    : primitive_type
-                                | composit_type
+                            | VAR variable_name                     statement_end
+                            ;
+        variable_name           : ID
+                                ;
+        type                    : primitive_type     // representing type of variable
+                                | composite_type     // can be type of Struct or Interface (user defined)
                                 | array_type;
             primitive_type          : INT
                                     | FLOAT
                                     | BOOLEAN
-                                    | STRING;
-            array_type              : dimension_list (primitive_type | composit_type);
-                dimension_list          : dimension dimension_list | dimension;
-                    dimension              : LB ( integer_literal | constant ) RB;
+                                    | STRING
+                                    ;
+            // array_type              : dimension_list (primitive_type | composit_type);
+            array_type              : dimension_list primitive_type 
+                                    | dimension_list composit_type
+                                    ;
+                dimension_list          : dimension dimension_list 
+                                        | dimension
+                                        ;
+                    dimension               : LB integer_literal RB
+                                            | LB constant        RB
+                                            ;
                         integer_literal         : DECIMAL_INTEGER
                                                 | BINARY_INTEGER
                                                 | OCTAL_INTEGER
-                                                | HEXA_INTEGER;
-                        constant                : ;
-        initialisation          : EQUAL expression; // value must be computable at compile time
-        statement_end       : SEMICOLON | NEWLINE;
+                                                | HEXA_INTEGER
+                                                ;
+        initialisation          : EQUAL expression
+                                ; // value must be computable at compile time
+        statement_end       : SEMICOLON 
+                            | NEWLINE
+                            ;
     constant_declaration    : CONST const_name EQUAL value statement_end;
         const_name              : ID;
-        value                   : (literal_constant | expression); // value must be computable at compile time
+        // value                   : (literal_constant | expression); // value must be computable at compile time
+        value                   : literal_constant
+                                | expression
+                                ;
             literal_constant        : integer_literal
                                     | FLOATING_POINT
                                     | STRING_LITERAL
@@ -220,14 +294,17 @@ statement           : variable_declaration
     assignment_statement    : lhs assignment_operator rhs statement_end;
         lhs                     : scalar_variable
                                 | array_element_access
-                                | struct_field_access;
+                                | struct_field_access
+                                ;
         assignment_operator     : ASS
                                 | ADD_ASS
                                 | SUB_ASS
                                 | MUL_ASS
                                 | DIV_ASS
-                                | MOD_ASS;
-        rhs                     : expression;   // value must be compatible with the type of lhs
+                                | MOD_ASS
+                                ;
+        rhs                     : expression
+                                ;   // value must be compatible with the type of lhs
     // How about the statement_end which enforces the ending of the statement ???
     if_statement            : IF LP boolean_expression RP block
                             | IF LP boolean_expression RP block              else 
@@ -235,16 +312,38 @@ statement           : variable_declaration
                             | IF LP boolean_expression RP block else_if_list else;
         else_if_list            : else_if else_if_list | else_if ;
             else_if                 : ELSE IF LP boolean_expression RP block;
-        else                : ELSE block;
+        else                    : ELSE block;
+    /*
+        for statement: 
+            - basic form
+            - form with initialization
+            - form for iterating over an array
+     */
+    for_statement           : basic_for_statement
+                            | ini_for_statement
+                            | range_for_statement;
+        basic_for_statement     : FOR boolean_expression block;
+        range_for_statement     : FOR index COMMA value_array ASS RANGE array block;
+            index                   : ID;   // if it is an UNDERSCORE character -> may be handled in semantic analysis
+            value_array             : ID;
+            array                   : ID;
+    break_statement             : BREAK statement_end; // inside the for_statement handled by semantic analysis (context stack)
+    continue_statement          : CONTINUE statement_end;
+
+    return_statement            : RETURN
+                                | RETURN expression;
+
+
     
 
 
 
 /*
-    what semantic analysis do, not the parser's job: 
+    what semantic analysis (semantic checking) do, not the parser's job: 
         - scope
         - type compatible
         - operation is allowed for a type
         - assignment but not declaration -> add to the symbol table
+        - scope hierarchy
  */
 // -------------------------------------------
