@@ -337,7 +337,7 @@ statement           : variable_declaration
                                     // call the method of the struct type
                                     ex6                     : ex6 LB expression RB
                                                             | ex6 DOT function_call
-                                                            | ex6 DOT ID
+                                                            | ex6 DOT field_name
                                                             | ex7
                                                             ;
                                         ex7                     : constant      // ID??
@@ -362,29 +362,33 @@ statement           : variable_declaration
                                             literal                 : array_literal
                                                                     | struct_literal
                                                                     ;
-                                                array_literal           : array_type LCB element_array_list RCB
+                                                // must always have the [array_type] part
+                                                // but inside, it can be 
+                                                    // expression (in the case of multiple array): allow array_type
+                                                    // not the expression but in the type of LCB
+                                                array_literal           : array_type LCB array_element_list RCB
                                                                         ;
-                                                    element_array_list      : element_array_prime
+                                                    array_element_list      : array_element_prime
                                                                             |
                                                                             ;
-                                                        element_array_prime     : element_array COMMA element_array_prime
-                                                                                | element_array
+                                                        array_element_prime     : array_element COMMA array_element_prime
+                                                                                | array_element
                                                                                 ;
                                                             // allowing type deduction
                                                             // Take one part of the array_literal
                                                             // array_literal           : [array_type] (LCB element_array_list RCB)
-                                                            element_array           : expression                    // which can allow typed array literal
-                                                                                    | LCB element_array_list RCB    // allow type deduction
+                                                            array_element           : expression                    // which can allow typed array literal
+                                                                                    | LCB array_element_list RCB    // allow type deduction
                                                                                     ;
-                                                struct_literal          : struct_name LCB element_struct_list RCB
+                                                struct_literal          : struct_name LCB struct_element_list RCB
                                                                         ;
-                                                    element_struct_list     : element_struct_prime
+                                                    struct_element_list     : struct_element_prime
                                                                             |
                                                                             ;
-                                                        element_struct_prime    : element_struct COMMA element_struct_prime
-                                                                                | element_struct
+                                                        struct_element_prime    : struct_element COMMA struct_element_prime
+                                                                                | struct_element
                                                                                 ;
-                                                            element_struct          : field_name COLON expression
+                                                            struct_element          : field_name COLON expression
                                                                                     ;
                                                                 field_name              : ID
                                                                                         ;   
@@ -430,6 +434,8 @@ statement           : variable_declaration
                             | IF LP boolean_expression RP block else_if_list
                             | IF LP boolean_expression RP block else_if_list else
                             ;
+        boolean_expression      : expression
+                                ;
         else_if_list            : else_if else_if_list | else_if 
                                 ;
             else_if                 : ELSE IF LP boolean_expression RP block
