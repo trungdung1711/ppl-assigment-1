@@ -3,5 +3,6 @@
 *.Identifier
 /target
 /my-test
+/go-test
 /src/test/solutions
 /src/test/testcases

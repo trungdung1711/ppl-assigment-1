@@ -113,6 +113,7 @@ RB                      : ']' ;
 LCB                     : '{' ;
 RCB                     : '}' ;
 COMMA                   : ',' ;
+COLON                   : ':' ;
 SEMICOLON               : ';' ;
 
 /*
@@ -191,8 +192,19 @@ declaration         : constant_declaration
                                             ;
                     property_name               : ID
                                                 ;
-        interface_declaration   : TYPE interface_name INTERFACE LCB list RCB
+        interface_declaration   : TYPE interface_name INTERFACE LCB method_declaration_list RCB statement_end
                                 ;
+            interface_name          : ID
+                                    ;
+            // can it be empty list ???
+            method_declaration_list : method_declaration method_declaration_list
+                                    | method_declaration
+                                    ;
+                method_declaration      : function_name LP parameter_list RP type statement_end
+                                        | function_name LP parameter_list RP statement_end
+                                        ;
+
+    // not the same as C/C++ when the declaration can be separated from function definition
     function_declaration: function_definition
                         ;
         function_definition : normal_function_definition
@@ -230,7 +242,7 @@ declaration         : constant_declaration
                 method_header               : FUNC LP receiver RP function_name LP parameter_list RP type
                                             | FUNC LP receiver RP function_name LP parameter_list RP
                                             ;
-                    receiver                    : name composite_type
+                    receiver                    : name type
                                                 ; 
 
 statement           : variable_declaration
@@ -253,13 +265,17 @@ statement           : variable_declaration
                                 ;
         type                    : primitive_type     // representing type of variable
                                 | composite_type     // can be type of Struct or Interface (user defined)
-                                | array_type;
+                                | array_type
+                                ;
             primitive_type          : INT
                                     | FLOAT
                                     | BOOLEAN
                                     | STRING
                                     ;
             // array_type              : dimension_list (primitive_type | composit_type);
+            // should be the expression while the semantic analysis would reject the incorrect one
+            // based on the MiniGo specification:
+            // - only allow integer_literal and constant only
             array_type              : dimension_list primitive_type 
                                     | dimension_list composit_type
                                     ;
@@ -274,14 +290,111 @@ statement           : variable_declaration
                                                 | OCTAL_INTEGER
                                                 | HEXA_INTEGER
                                                 ;
+                        // the parser cannot determine 
+                        // whether an identifier actually refers to a constant
+                        constant                : ID 
+                                                ;
+        // value must be computable at compile time
         initialisation          : EQUAL expression
-                                ; // value must be computable at compile time
+                                ;
+            expression              : expression OR ex1
+                                    | ex1
+                                    ;
+                ex1                     : ex1 AND ex2
+                                        | ex2 
+                                        ;
+                    ex2                     : ex2 relational_operator ex3
+                                            | ex3
+                                            ;
+                        relational_operator     : DOUBLE_EQUAL
+                                                | NOT_EQUAL
+                                                | LESS_THAN
+                                                | LESS_THAN_OR_EQUAL
+                                                | GREATER_THAN
+                                                | GREATER_THAN_OR_EQUAL
+                                                ;
+                        ex3                     : ex3 binary_add_sub ex4
+                                                | ex4
+                                                ;
+                            binary_add_sub          : ADD
+                                                    | SUB
+                                                    ;
+                            ex4                     : ex4 mul_div_mod ex5
+                                                    | ex5
+                                                    ;
+                                mul_div_mod             : MUL
+                                                        | DIV
+                                                        | MOD
+                                                        ;
+                                ex5                     : unary_not_sub ex5
+                                                        | ex6
+                                                        ;
+                                    unary_not_sub           : NOT
+                                                            | SUB
+                                                            ;
+                                    // get the element in the array (expression)
+                                    // get the element of the struct type
+                                    // call the method of the struct type
+                                    ex6                     : ex6 LB expression RB
+                                                            | ex6 DOT function_call
+                                                            | ex6 DOT ID
+                                                            | ex7
+                                                            ;
+                                        ex7                     : constant      // ID??
+                                                                | literal
+                                                                | variable_name // ID??     // can be merged and let semantic analysis to handle??
+                                                                | call
+                                                                | LCB expression RCB 
+                                                                ;
+                                            call                    : function_call
+                                                                    // | method_call - already represented by DOT operator
+                                                                    ;
+                                                function_call           : function_name LP argument_list RP
+                                                                        ;
+                                                    argument_list           : argument_prime
+                                                                            | 
+                                                                            ;
+                                                        argument_prime          : argument COMMA argument_prime
+                                                                                | argument
+                                                                                ;
+                                                            argument                : expression
+                                                                                    ;
+                                            literal                 : array_literal
+                                                                    | struct_literal
+                                                                    ;
+                                                array_literal           : array_type LCB element_array_list RCB
+                                                                        ;
+                                                    element_array_list      : element_array_prime
+                                                                            |
+                                                                            ;
+                                                        element_array_prime     : element_array COMMA element_array_prime
+                                                                                | element_array
+                                                                                ;
+                                                            // allowing type deduction
+                                                            // Take one part of the array_literal
+                                                            // array_literal           : [array_type] (LCB element_array_list RCB)
+                                                            element_array           : expression                    // which can allow typed array literal
+                                                                                    | LCB element_array_list RCB    // allow type deduction
+                                                                                    ;
+                                                struct_literal          : struct_name LCB element_struct_list RCB
+                                                                        ;
+                                                    element_struct_list     : element_struct_prime
+                                                                            |
+                                                                            ;
+                                                        element_struct_prime    : element_struct COMMA element_struct_prime
+                                                                                | element_struct
+                                                                                ;
+                                                            element_struct          : field_name COLON expression
+                                                                                    ;
+                                                                field_name              : ID
+                                                                                        ;   
         statement_end       : SEMICOLON 
                             | NEWLINE
                             ;
     constant_declaration    : CONST const_name EQUAL value statement_end;
         const_name              : ID;
         // value                   : (literal_constant | expression); // value must be computable at compile time
+        // should be a general expression (no need to separate them)
         value                   : literal_constant
                                 | expression
                                 ;
@@ -292,6 +405,12 @@ statement           : variable_declaration
                 boolean_literal         : TRUE
                                         | FALSE;
     assignment_statement    : lhs assignment_operator rhs statement_end;
+        // note, we must allow them to be chained together
+        // allow expression in []
+        // the left hand side is separately defined from the expression
+        // only ASS can be changed to declaration if the expression in the right hand side
+        // does contain the value
+        // the other operator will be rejected by semantic analysis
         lhs                     : scalar_variable
                                 | array_element_access
                                 | struct_field_access
@@ -309,10 +428,14 @@ statement           : variable_declaration
     if_statement            : IF LP boolean_expression RP block
                             | IF LP boolean_expression RP block              else 
                             | IF LP boolean_expression RP block else_if_list
-                            | IF LP boolean_expression RP block else_if_list else;
-        else_if_list            : else_if else_if_list | else_if ;
-            else_if                 : ELSE IF LP boolean_expression RP block;
-        else                    : ELSE block;
+                            | IF LP boolean_expression RP block else_if_list else
+                            ;
+        else_if_list            : else_if else_if_list | else_if 
+                                ;
+            else_if                 : ELSE IF LP boolean_expression RP block
+                                    ;
+        else                    : ELSE block
+                                ;
     /*
         for statement: 
             - basic form
