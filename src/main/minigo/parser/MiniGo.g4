@@ -138,8 +138,6 @@ FLOATING_POINT          : INTEGER DOT FRACTION? EXPONENT? ;
     fragment EXPONENT           : [eE] [+-]? DIGIT+ ;
 STRING_LITERAL          : '"' (~["\\] | ESCAPE_SEQUENCE)* '"';
     fragment ESCAPE_SEQUENCE    : '\\' [ntr"\\];
-// BOOLEAN_LITERAL         : TRUE | FALSE ;
-// NIL_LITERAL             : NIL ;
 /* 
     identifiers:
     - variable names
@@ -285,11 +283,6 @@ statement           : variable_declaration
                     dimension               : LB integer_literal RB
                                             | LB constant        RB
                                             ;
-                        integer_literal         : DECIMAL_INTEGER
-                                                | BINARY_INTEGER
-                                                | OCTAL_INTEGER
-                                                | HEXA_INTEGER
-                                                ;
                         // the parser cannot determine 
                         // whether an identifier actually refers to a constant
                         constant                : ID 
@@ -359,9 +352,21 @@ statement           : variable_declaration
                                                                                 ;
                                                             argument                : expression
                                                                                     ;
-                                            literal                 : array_literal
+                                            literal                 : integer_literal
+                                                                    | FLOATING_POINT
+                                                                    | STRING_LITERAL
+                                                                    | boolean_literal
+                                                                    | NIL
+                                                                    | array_literal
                                                                     | struct_literal
                                                                     ;
+                                                integer_literal         : DECIMAL_INTEGER
+                                                                        | BINARY_INTEGER
+                                                                        | OCTAL_INTEGER
+                                                                        | HEXA_INTEGER
+                                                                        ;
+                                                boolean_literal         : TRUE
+                                                                        | FALSE;
                                                 // must always have the [array_type] part
                                                 // but inside, it can be 
                                                     // expression (in the case of multiple array): allow array_type
@@ -391,7 +396,7 @@ statement           : variable_declaration
                                                             struct_element          : field_name COLON expression
                                                                                     ;
                                                                 field_name              : ID
-                                                                                        ;   
+                                                                                        ;
         statement_end       : SEMICOLON 
                             | NEWLINE
                             ;
@@ -405,10 +410,10 @@ statement           : variable_declaration
             literal_constant        : integer_literal
                                     | FLOATING_POINT
                                     | STRING_LITERAL
-                                    | boolean_literal;
-                boolean_literal         : TRUE
-                                        | FALSE;
-    assignment_statement    : lhs assignment_operator rhs statement_end;
+                                    | boolean_literal
+                                    ;
+    assignment_statement    : lhs assignment_operator rhs statement_end
+                            ;
         // note, we must allow them to be chained together
         // allow expression in []
         // the left hand side is separately defined from the expression
