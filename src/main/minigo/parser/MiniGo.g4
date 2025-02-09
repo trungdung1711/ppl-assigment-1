@@ -333,11 +333,10 @@ statement           : variable_declaration
                                                             | ex6 DOT field_name
                                                             | ex7
                                                             ;
-                                        ex7                     : constant      // ID??
-                                                                | literal
-                                                                | variable_name // ID??     // can be merged and let semantic analysis to handle??
+                                        ex7                     : literal
+                                                                | variable_name         // can be merged and let semantic analysis to handle??
                                                                 | call
-                                                                | LCB expression RCB 
+                                                                | LP expression RP      // result from other operator
                                                                 ;
                                             call                    : function_call
                                                                     // | method_call - already represented by DOT operator
@@ -404,14 +403,14 @@ statement           : variable_declaration
         const_name              : ID;
         // value                   : (literal_constant | expression); // value must be computable at compile time
         // should be a general expression (no need to separate them)
-        value                   : literal_constant
-                                | expression
+        value                   : expression
+                                // | literal_constant-redundant, as expression can be resolve to literal actually
                                 ;
-            literal_constant        : integer_literal
-                                    | FLOATING_POINT
-                                    | STRING_LITERAL
-                                    | boolean_literal
-                                    ;
+            // literal_constant        : integer_literal
+            //                         | FLOATING_POINT
+            //                         | STRING_LITERAL
+            //                         | boolean_literal
+            //                         ;
     assignment_statement    : lhs assignment_operator rhs statement_end
                             ;
         // note, we must allow them to be chained together
