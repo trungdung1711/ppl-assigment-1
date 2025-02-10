@@ -438,10 +438,14 @@ statement           : variable_declaration
         // the normal expression grammar.
 
         // parse the same as the expression actually
-        lhs                     : lhs DOT field_name
-                                | lhs LB expression RB
-                                | scalar_variable
-                                ;
+        // lhs                     : lhs DOT field_name
+        //                         | lhs LB expression RB
+        //                         | scalar_variable
+        //                         ;
+            lhs                     : expression DOT field_name
+                                    | expression LB expression RB
+                                    | scalar_variable
+                                    ;
             scalar_variable         : ID
                                     ;
         assignment_operator     : ASS       
@@ -496,6 +500,7 @@ statement           : variable_declaration
                                 ;
         function_call_statement     : function_call statement_end
                                     ;
+        // problematic
         method_call_statement       : expression DOT function_call statement_end
                                     ;
     return_statement            : RETURN expression statement_end
