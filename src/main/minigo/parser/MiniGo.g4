@@ -330,7 +330,7 @@ statement           : variable_declaration
                                     // get the element of the struct type
                                     // call the method of the struct type
                                     ex6                     : ex6 LB expression RB
-                                                            | ex6 DOT function_call
+                                                            | ex6 DOT function_call     // with the receiver before the DOT operator
                                                             | ex6 DOT field_name
                                                             | ex7
                                                             ;
@@ -436,6 +436,8 @@ statement           : variable_declaration
         // but they are not part of expressions. 
         // This means the parser must recognize them without relying on 
         // the normal expression grammar.
+
+        // parse the same as the expression actually
         lhs                     : lhs DOT field_name
                                 | lhs LB expression RB
                                 | scalar_variable
@@ -489,10 +491,15 @@ statement           : variable_declaration
     // but they are not part of expressions. 
     // This means the parser must recognize them without relying on 
     // the normal expression grammar.
-    // call_statement              :
-    //                             ;
+    call_statement              : function_call_statement
+                                | method_call_statement
+                                ;
+        function_call_statement     : function_call statement_end
+                                    ;
+        method_call_statement       : expression DOT function_call statement_end
+                                    ;
     return_statement            : RETURN expression statement_end
-                                | RETURN statement_end
+                                | RETURN            statement_end
                                 ;
 /*
     what semantic analysis (semantic checking) do, not the parser's job: 
