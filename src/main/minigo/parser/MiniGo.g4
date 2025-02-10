@@ -243,6 +243,7 @@ declaration         : constant_declaration
                     receiver                    : name type
                                                 ; 
 
+// it doesn't contain function_declaration, thus a block should have multiple statements
 statement           : variable_declaration
                     | constant_declaration
                     | assignment_statement
@@ -399,10 +400,21 @@ statement           : variable_declaration
         statement_end       : SEMICOLON 
                             | NEWLINE
                             ;
+    // different between Go and C/C++
+    // In Go, const means "absolutely immutable and evaluable at compile time."
+    // Go doesn't allow 
+    // var z = 100
+	// const m = z + 100
+    // -----
+    // In C/C++, const only means "this value cannot be changed after initialization," 
+    // but it does not have to be evaluable at compile time.
+    // In C++, const int y = x + 10; is allowed, but x might change later, causing confusion.
+    // note about constexpr
     constant_declaration    : CONST const_name EQUAL value statement_end;
         const_name              : ID;
-        // value                   : (literal_constant | expression); // value must be computable at compile time
         // should be a general expression (no need to separate them)
+        // Go does not allow const for array, struct, slice, or map types.
+        // Valid constant types: int, float, bool, string, complex.
         value                   : expression
                                 // | literal_constant-redundant, as expression can be resolve to literal actually
                                 ;
@@ -419,11 +431,19 @@ statement           : variable_declaration
         // only ASS can be changed to declaration if the expression in the right hand side
         // does contain the value
         // the other operator will be rejected by semantic analysis
-        lhs                     : scalar_variable
-                                | array_element_access
-                                | struct_field_access
+
+        // Here, both foo().bar()[1].baz(); and myArray[2][3] use chaining, 
+        // but they are not part of expressions. 
+        // This means the parser must recognize them without relying on 
+        // the normal expression grammar.
+        lhs                     : lhs DOT field_name
+                                | lhs LB expression RB
+                                | scalar_variable
                                 ;
-        assignment_operator     : ASS
+            scalar_variable         : ID
+                                    ;
+        assignment_operator     : ASS       
+                                // the only operator, that can be changed from assignment to declaration
                                 | ADD_ASS
                                 | SUB_ASS
                                 | MUL_ASS
@@ -460,17 +480,20 @@ statement           : variable_declaration
             index                   : ID;   // if it is an UNDERSCORE character -> may be handled in semantic analysis
             value_array             : ID;
             array                   : ID;
-    break_statement             : BREAK statement_end; // inside the for_statement handled by semantic analysis (context stack)
-    continue_statement          : CONTINUE statement_end;
-
-    return_statement            : RETURN
-                                | RETURN expression;
-
-
-    
-
-
-
+                                // inside the for_statement handled by semantic analysis (context stack)
+    break_statement             : BREAK statement_end
+                                ;
+    continue_statement          : CONTINUE statement_end
+                                ;
+    // Here, both foo().bar()[1].baz(); and myArray[2][3] use chaining, 
+    // but they are not part of expressions. 
+    // This means the parser must recognize them without relying on 
+    // the normal expression grammar.
+    // call_statement              :
+    //                             ;
+    return_statement            : RETURN expression statement_end
+                                | RETURN statement_end
+                                ;
 /*
     what semantic analysis (semantic checking) do, not the parser's job: 
         - scope
