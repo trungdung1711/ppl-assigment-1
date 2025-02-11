@@ -168,13 +168,15 @@ UNCLOSE_STRING:.;
 
 // PARSER RULES
 // Write the grammar using BNF not EBNF
+// A valid program must have something actually
 program             : declaration+ EOF
                     ;
 
-declaration         : constant_declaration
-                    | variable_declaration
+// should not be inside a block
+declaration         : constant_declaration  // global things
+                    | variable_declaration  // global things
                     | type_declaration      // struct or interface
-                    | function_declaration
+                    | function_declaration  // a function
                     ;
     type_declaration    : struct_declaration
                         | interface_declaration
@@ -235,6 +237,15 @@ declaration         : constant_declaration
                                                                 ;
                 function_body                   : block
                                                 ;
+                    block                           : LCB block_member_list RCB
+                                                    ;
+                        // list of nullable block_member, not separated by something
+                        block_member_list               : block_member block_member_list
+                                                        |
+                                                        ;
+                            block_member                    : block
+                                                            | statement
+                                                            ;
             method_definition           : method_header function_body
                                         ;
                 method_header               : FUNC LP receiver RP function_name LP parameter_list RP type
@@ -244,15 +255,16 @@ declaration         : constant_declaration
                                                 ; 
 
 // it doesn't contain function_declaration, thus a block should have multiple statements
-statement           : variable_declaration
-                    | constant_declaration
-                    | assignment_statement
-                    | if_statement
-                    | for_statement
-                    | break_statement
-                    | continue_statement
-                    | call_statement
-                    | return_statement
+// check-out list for AST generation
+statement           : variable_declaration  // O
+                    | constant_declaration  // O
+                    | assignment_statement  // O
+                    | if_statement          // O
+                    | for_statement         // O
+                    | break_statement       // O
+                    | continue_statement    // O
+                    | call_statement        // O
+                    | return_statement      // O
                     ;
     // variable_declaration    : VAR variable_name type? initialisation? statement_end;
     variable_declaration    : VAR variable_name type initialisation statement_end

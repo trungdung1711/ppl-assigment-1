@@ -6,3 +6,5 @@
 /go-test
 /src/test/solutions
 /src/test/testcases
+/cpp-test
+/.vscode
