@@ -2,3 +2,9 @@
 /src/main/minigo/parser/.antlr
 *.Identifier
 /target
+/my-test
+/go-test
+/src/test/solutions
+/src/test/testcases
+/cpp-test
+/.vscode
