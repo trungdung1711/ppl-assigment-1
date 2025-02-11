@@ -478,9 +478,9 @@ statement           : variable_declaration  // O
     // must be check again for correct AST generation
     // may not explicitly represented in AST
     if_statement            : IF LP boolean_expression RP block
-                            | IF LP boolean_expression RP block              else 
+                            | IF LP boolean_expression RP block              else_block
                             | IF LP boolean_expression RP block else_if_list
-                            | IF LP boolean_expression RP block else_if_list else
+                            | IF LP boolean_expression RP block else_if_list else_block
                             ;
         boolean_expression      : expression
                                 ;
@@ -488,7 +488,7 @@ statement           : variable_declaration  // O
                                 ;
             else_if                 : ELSE IF LP boolean_expression RP block
                                     ;
-        else                    : ELSE block
+        else_block                  : ELSE block
                                 ;
     /*
         for statement: 
