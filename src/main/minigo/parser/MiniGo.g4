@@ -271,13 +271,16 @@ statement           : variable_declaration
                                     | BOOLEAN
                                     | STRING
                                     ;
+            // parser would allow wrong type, but not the case of semantic analysis
+            composite_type          : ID
+                                    ;
             // array_type              : dimension_list (primitive_type | composit_type);
             // should be the expression while the semantic analysis would reject the incorrect one
             // based on the MiniGo specification:
             // - only allow integer_literal and constant only
             // - different from array indexing in expression actually
             array_type              : dimension_list primitive_type 
-                                    | dimension_list composit_type
+                                    | dimension_list composite_type
                                     ;
                 dimension_list          : dimension dimension_list 
                                         | dimension
@@ -460,6 +463,8 @@ statement           : variable_declaration
         rhs                     : expression
                                 ;   // value must be compatible with the type of lhs
     // How about the statement_end which enforces the ending of the statement ???
+    // must be check again for correct AST generation
+    // may not explicitly represented in AST
     if_statement            : IF LP boolean_expression RP block
                             | IF LP boolean_expression RP block              else 
                             | IF LP boolean_expression RP block else_if_list
