@@ -181,6 +181,7 @@ declaration         : constant_declaration  // global things
     type_declaration    : struct_declaration
                         | interface_declaration
                         ;
+        // should this declaration contains statement_end NOTE
         struct_declaration  : TYPE struct_name STRUCT LCB property_declaration_list RCB statement_end
                             ;
             struct_name             : ID
