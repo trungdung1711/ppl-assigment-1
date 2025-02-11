@@ -275,6 +275,7 @@ statement           : variable_declaration
             // should be the expression while the semantic analysis would reject the incorrect one
             // based on the MiniGo specification:
             // - only allow integer_literal and constant only
+            // - different from array indexing in expression actually
             array_type              : dimension_list primitive_type 
                                     | dimension_list composit_type
                                     ;
@@ -442,10 +443,10 @@ statement           : variable_declaration
         //                         | lhs LB expression RB
         //                         | scalar_variable
         //                         ;
-            lhs                     : expression DOT field_name
-                                    | expression LB expression RB
-                                    | scalar_variable
-                                    ;
+        lhs                     : expression DOT field_name
+                                | expression LB expression RB
+                                | scalar_variable
+                                ;
             scalar_variable         : ID
                                     ;
         assignment_operator     : ASS       
@@ -481,11 +482,36 @@ statement           : variable_declaration
     for_statement           : basic_for_statement
                             | ini_for_statement
                             | range_for_statement;
-        basic_for_statement     : FOR boolean_expression block;
-        range_for_statement     : FOR index COMMA value_array ASS RANGE array block;
-            index                   : ID;   // if it is an UNDERSCORE character -> may be handled in semantic analysis
-            value_array             : ID;
-            array                   : ID;
+        basic_for_statement     : FOR boolean_expression block
+                                ;
+        ini_for_statement       : FOR ini SEMICOLON condition SEMICOLON update block
+                                ;
+            // there can be mistake at that point, but I choose to risk
+            ini                     : init_assignment
+                                    | init_declaration
+                                    ;
+                init_assignment         : for_lhs assignment_operator rhs
+                                        ;
+                    for_lhs                 : scalar_variable
+                                            ;
+                init_declaration        : VAR variable_name type initialisation
+                                        | VAR variable_name      initialisation
+                                        ;
+            condition               : boolean_expression
+                                    ;
+            update                  : for_lhs assignment_operator rhs
+                                    ;
+        range_for_statement     : FOR index COMMA value_array ASS RANGE array block
+                                ;
+            index                   : ID
+                                    ;   // if it is an UNDERSCORE character -> may be handled in semantic analysis
+            value_array             : ID
+                                    ;
+            // should be defined as expression
+            // element access
+            // return from function
+            array                   : expression
+                                    ;
                                 // inside the for_statement handled by semantic analysis (context stack)
     break_statement             : BREAK statement_end
                                 ;
