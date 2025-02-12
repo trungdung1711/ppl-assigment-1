@@ -226,13 +226,13 @@ NEWLINE             : '\n'          -> skip ;
 ILLEGAL_ESCAPE      : '"' (~[\\"\r\n] | ESCAPE_SEQUENCE)* '\\' ~[ntr"\\]
 {
     text = self.text
-    raise IllegalEscape(text[1:])
+    raise IllegalEscape(text)
 };
 
 UNCLOSE_STRING      : '"' (~[\\"\r\n] | ESCAPE_SEQUENCE)*
 {
     text = self.text
-    raise UncloseString(text[1:])
+    raise UncloseString(text)
 };
 
 ERROR_CHAR          : .

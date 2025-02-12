@@ -24,7 +24,7 @@ class LexerSuite(unittest.TestCase):
         self.assertTrue(TestLexer.checkLexeme("""$value""","""ErrorToken $""",106))
     
     def test_unclosed_string(self):
-        self.assertTrue(TestLexer.checkLexeme(""""this is a string""","""Unclosed string: this is a string""",107))
+        self.assertTrue(TestLexer.checkLexeme(""""this is a string""","""Unclosed string: \"this is a string""",107))
 
     def test_double_quote_in_string_token(self):
-        self.assertTrue(TestLexer.checkLexeme("""\"this string contains \" \"""","""\"this string contains \",Unclosed string: """,108))
+        self.assertTrue(TestLexer.checkLexeme("""\"this string contains \" \"""","""\"this string contains \",Unclosed string: \"""",108))
