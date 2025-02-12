@@ -219,7 +219,8 @@ declaration         : constant_declaration  // global things
                     function_name               : ID
                                                 ;
                     parameter_list              : parameter_prime
-                                                | ;
+                                                | 
+                                                ;
                         parameter_prime             : parameter COMMA parameter_prime
                                                     | parameter
                                                     ;
