@@ -27,6 +27,16 @@ options{
 
 // ANTLR prioritizes rules based on order
 
+// NOTE
+/*
+    - The @lexer::header section in an ANTLR .g4 file 
+    is a special directive used to inject custom code 
+    into the generated lexer.
+
+    - When ANTLR generates the Python lexer, 
+    it will include this code at the top of the lexer file.
+ */
+
 
 // LEXER RULES
 
