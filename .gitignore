@@ -9,4 +9,5 @@
 /cpp-test
 /.vscode
 /python-test
-**//__pycache__
+**/__pycache__
+/text-test

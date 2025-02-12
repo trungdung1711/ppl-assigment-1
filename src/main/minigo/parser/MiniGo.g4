@@ -35,6 +35,22 @@ options{
 
     - When ANTLR generates the Python lexer, 
     it will include this code at the top of the lexer file.
+
+    - Yes, via inline actions
+ */
+
+
+// NOTE
+/*
+    - Defines custom methods inside the lexer class.
+
+    - Inside the lexer class
+
+    - Yes, via methods
+
+    - If error handling gets complex, 
+    using @lexer::members to define separate functions makes 
+    the code cleaner and more maintainable.
  */
 
 
@@ -146,7 +162,16 @@ FLOATING_POINT          : INTEGER DOT FRACTION? EXPONENT? ;
     fragment INTEGER            : DIGIT+ ;
     fragment FRACTION           : DIGIT+ ;
     fragment EXPONENT           : [eE] [+-]? DIGIT+ ;
-STRING_LITERAL          : '"' (~["\\] | ESCAPE_SEQUENCE)* '"';
+// handling raw characters
+// raw \n -> X
+// raw \t -> O
+// raw \r -> X
+STRING_LITERAL          : '"' (~[\\"\r\n] | ESCAPE_SEQUENCE)* '"';
+    // \n
+    // \t
+    // \r
+    // \"
+    // \\
     fragment ESCAPE_SEQUENCE    : '\\' [ntr"\\];
 /* 
     identifiers:
