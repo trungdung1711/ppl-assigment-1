@@ -189,7 +189,7 @@ declaration         : constant_declaration  // global things
             property_declaration_list   : property_declaration property_declaration_list
                                         | property_declaration
                                         ;
-                property_declaration        : property_name type statement_end
+                property_declaration        : property_name type_part statement_end
                                             ;
                     property_name               : ID
                                                 ;
@@ -201,7 +201,7 @@ declaration         : constant_declaration  // global things
             method_declaration_list : method_declaration method_declaration_list
                                     | method_declaration
                                     ;
-                method_declaration      : function_name LP parameter_list RP type statement_end
+                method_declaration      : function_name LP parameter_list RP type_part statement_end
                                         | function_name LP parameter_list RP statement_end
                                         ;
 
@@ -213,7 +213,7 @@ declaration         : constant_declaration  // global things
                             ;
             normal_function_definition  : function_header function_body 
                                         ;
-                function_header             : FUNC function_name LP parameter_list RP type
+                function_header             : FUNC function_name LP parameter_list RP type_part
                                             | FUNC function_name LP parameter_list RP
                                             ;
                     function_name               : ID
@@ -228,14 +228,14 @@ declaration         : constant_declaration  // global things
                             parameter                   : name_type
                                                         | same_type_list
                                                         ;
-                                same_type_list          : name_list type
+                                same_type_list          : name_list type_part
                                                         ;
                                     name_list               : name COMMA name_list
                                                             | name
                                                             ;
                                         name                    : ID
                                                                 ;
-                                name_type                   : name type
+                                name_type                   : name type_part
                                                                 ;
                 function_body                   : block
                                                 ;
@@ -250,10 +250,10 @@ declaration         : constant_declaration  // global things
                                                             ;
             method_definition           : method_header function_body
                                         ;
-                method_header               : FUNC LP receiver RP function_name LP parameter_list RP type
+                method_header               : FUNC LP receiver RP function_name LP parameter_list RP type_part
                                             | FUNC LP receiver RP function_name LP parameter_list RP
                                             ;
-                    receiver                    : name type
+                    receiver                    : name type_part
                                                 ; 
 
 // it doesn't contain function_declaration, thus a block should have multiple statements
@@ -269,14 +269,14 @@ statement           : variable_declaration  // O
                     | return_statement      // O
                     ;
     // variable_declaration    : VAR variable_name type? initialisation? statement_end;
-    variable_declaration    : VAR variable_name type initialisation statement_end
-                            | VAR variable_name type                statement_end
-                            | VAR variable_name      initialisation statement_end
-                            | VAR variable_name                     statement_end
+    variable_declaration    : VAR variable_name type_part initialisation statement_end
+                            | VAR variable_name type_part                statement_end
+                            | VAR variable_name           initialisation statement_end
+                            | VAR variable_name                          statement_end
                             ;
         variable_name           : ID
                                 ;
-        type                    : primitive_type     // representing type of variable
+        type_part               : primitive_type     // representing type of variable
                                 | composite_type     // can be type of Struct or Interface (user defined)
                                 | array_type
                                 ;
@@ -513,8 +513,8 @@ statement           : variable_declaration  // O
                                         ;
                     for_lhs                 : scalar_variable
                                             ;
-                init_declaration        : VAR variable_name type initialisation
-                                        | VAR variable_name      initialisation
+                init_declaration        : VAR variable_name type_part initialisation
+                                        | VAR variable_name           initialisation
                                         ;
             condition               : boolean_expression
                                     ;

@@ -8,3 +8,5 @@
 /src/test/testcases
 /cpp-test
 /.vscode
+/python-test
+**//__pycache__
