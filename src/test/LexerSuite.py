@@ -2,7 +2,6 @@ import unittest
 from TestUtils import TestLexer
 
 class LexerSuite(unittest.TestCase):
-      
     def test_lower_identifier(self):
         """test identifiers"""
         self.assertTrue(TestLexer.checkLexeme("abc","abc,<EOF>",101))
@@ -15,4 +14,3 @@ class LexerSuite(unittest.TestCase):
     def test_keyword_func(self):
         """test keyword func"""
         self.assertTrue(TestLexer.checkLexeme("""func abc ( ) ""","""func,abc,(,),<EOF>""",104))
-    
