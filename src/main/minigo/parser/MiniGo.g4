@@ -701,22 +701,24 @@ statement           : variable_declaration  // O
      */
     for_statement           : basic_for_statement
                             | ini_for_statement
-                            | range_for_statement;
+                            | range_for_statement
+                            ;
         basic_for_statement     : FOR boolean_expression block
                                 ;
         ini_for_statement       : FOR ini SEMICOLON condition SEMICOLON update block
                                 ;
             // there can be mistake at that point, but I choose to risk
+            // NOTE: omit the declaration in for loop
             ini                     : init_assignment
-                                    | init_declaration
+                                    // | init_declaration
                                     ;
                 init_assignment         : for_lhs assignment_operator rhs
                                         ;
                     for_lhs                 : scalar_variable
                                             ;
-                init_declaration        : VAR variable_name type_part initialisation
-                                        | VAR variable_name           initialisation
-                                        ;
+                // init_declaration        : VAR variable_name type_part initialisation
+                //                         | VAR variable_name           initialisation
+                //                         ;
             condition               : boolean_expression
                                     ;
             update                  : for_lhs assignment_operator rhs
