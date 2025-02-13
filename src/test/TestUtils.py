@@ -71,16 +71,29 @@ class SyntaxException(Exception):
 class TestParser:
     @staticmethod
     def test(inputdir,outputdir,num):
+        # create a destination file
         dest = open(outputdir + "/" + str(num) + ".txt","w")
+        # create a lexer class with the input as the source code 
+        # which is in the form of FileStream
         lexer = MiniGoLexer(FileStream(inputdir + "/" + str(num) + ".txt"))
         listener = TestParser.createErrorListener()
 
+        # create a stream of tokens based on 
+        # the result of lexer (with the FileStream)
+        # This is where all the tokens are stored
+        # in a buffer, allowing the parser to do 
+        # Look ahead (LA)
         tokens = CommonTokenStream(lexer)
 
+        # create a parser with the input as
+        # a stream of tokens resulted from the 
+        # output of lexer
         parser = MiniGoParser(tokens)
         parser.removeErrorListeners()
         parser.addErrorListener(listener)
         try:
+            # Start the process of parsing from
+            # the top level rule
             parser.program()
             dest.write("successful\n")
         except SyntaxException as f:

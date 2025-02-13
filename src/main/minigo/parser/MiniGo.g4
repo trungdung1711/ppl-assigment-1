@@ -1,10 +1,15 @@
 grammar MiniGo;
 
 @lexer::header {
+# 2210573
 from lexererr import *
 }
 
 @lexer::members {
+# store the previous token type
+previousTokenType = None
+
+
 def emit(self):
     tk = self.type
     if tk == self.UNCLOSE_STRING:       
@@ -18,6 +23,23 @@ def emit(self):
         raise ErrorToken(result.text); 
     else:
         return super().emit();
+
+
+# Override higher-level method
+# def nextToken(self): 
+#     next_token = super().nextToken()
+#
+#     self.previousTokenType = next_token.type
+#
+#     return next_token
+
+
+# Override the emitToken() called by emit()
+def emitToken(self, token:Token):
+    # set the previousToken to be the current token
+    self.previousTokenType = token.type
+    # call the emitToken()
+    super().emitToken(token)
 }
 
 options{
@@ -192,7 +214,99 @@ MULTI_LIME_COMMENT  :  '/*' (MULTI_LIME_COMMENT | ~[/*])*  '*/' -> skip;
 
 // blanks, tabs, formfeeds, carriage returns and newlines
 WHITESPACE          : [ \t\f\r]+    -> skip ;
-NEWLINE             : '\n'          -> skip ;
+
+// NOTE
+/*
+    How nextToken() works
+    - Check If We Are at the End of Input (EOF):
+
+    - Try to Match a Token Using Lexer Rules:
+
+    - If a rule matches, it triggers an action (e.g., emit(), skip(), or more()).
+
+    - If no action is specified, the default behavior is to emit the token.
+
+    - Then the { ... } block is called whenever the lexer matches the NEWLINE token.
+
+    - AFTER executing the action, the lexer either emits or skips the NEWLINE token 
+    (depending on whether it calls emit(), skip(), or does nothing).
+ */
+NEWLINE             : '\n'
+{
+# logic to decide whether to skip or replace the NEWLINE with a SEMICOLON token
+must_be_replaced_when_before_NEWLINE_set = {
+    # ID
+    self.ID,
+    # integer
+    self.DECIMAL_INTEGER,
+    self.BINARY_INTEGER,
+    self.OCTAL_INTEGER,
+    self.HEXA_INTEGER,
+    # floating point
+    self.FLOATING_POINT,
+    # boolean
+    self.TRUE,
+    self.FALSE,
+    # string literal
+    self.STRING_LITERAL,
+    # keyword for type
+    self.INT,
+    self.FLOAT,
+    self.BOOLEAN,
+    self.STRING,
+    # keywords
+    self.RETURN,
+    self.CONTINUE,
+    self.BREAK,
+    # closed token
+    self.RP,
+    self.RB,
+    self.RCB
+}
+if self.previousTokenType in must_be_replaced_when_before_NEWLINE_set:
+    # replace and then skip the NEWLINE
+    # print('replacing')
+
+    semicolon_token = self._factory.create(
+    self._tokenFactorySourcePair,  # Source info
+    self.SEMICOLON,                # Token type
+    ";",                           # Text representation
+    self.DEFAULT_TOKEN_CHANNEL,    # Token channel
+    self._tokenStartCharIndex,     # Start position
+    self._tokenStartCharIndex,     # Stop position
+    self._tokenStartLine,          # Line number
+    self._tokenStartColumn         # Column number
+    )
+
+    # set the current token to be semicolon_token   -> emit() -> emitToken()
+    self.emitToken(semicolon_token)
+else:
+    # print('Ignoring phase')
+    self.skip()
+};
+
+
+/*
+    How parser interact with lexer
+    - When the parser requests a token, CommonTokenStream calls lexer.nextToken()
+
+    - Step 1: skip() Marks the Token for Skipping
+    self.skip() prevents the token from being returned to the parser.
+    ANTLR immediately calls nextToken() again to fetch another token.
+
+    - If NEWLINE is skipped, the parser never sees it, and previousTokenType 
+    remains unchanged.
+
+    - CommonTokenStream calls lexer.nextToken() repeatedly to preload tokens.
+
+    - It stores tokens internally, except skipped tokens.
+
+    - The parser fetches tokens from CommonTokenStream, not directly from the lexer.
+
+    - The skipped token is never added to CommonTokenStream.
+
+    - The lexer calls nextToken() again to get a new token.
+*/
 
 // Handling errors
 /*

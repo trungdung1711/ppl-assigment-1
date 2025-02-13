@@ -20,22 +20,24 @@ class ParserSuite(unittest.TestCase):
         input = """func main({}"""
         expect = "Error on line 1 col 11: {"
         self.assertTrue(TestParser.checkParser(input,expect,203))
+
     def test_wrong_variable(self):
-        input = """var int;"""
+        input = """var int\n"""
         expect = "Error on line 1 col 5: int"
         self.assertTrue(TestParser.checkParser(input,expect,204))
+
     def test_wrong_index(self):
-        input = """var i ;"""
+        input = """var i\n"""
         expect = "successful"
         self.assertTrue(TestParser.checkParser(input,expect,205))
     
     def test_complex_program(self):
-        input = """var a int = 12345;"""
+        input = """var a int = 12345\n"""
         expect = "successful"
         self.assertTrue(TestParser.checkParser(input,expect,206))
 
     def test_wrong_declaration_structure(self):
-        input = """vars val int = 100;"""
+        input = """vars val int = 100\n"""
         expect = "Error on line 1 col 1: vars"
         self.assertTrue(TestParser.checkParser(input,expect,207))
 
@@ -45,6 +47,17 @@ class ParserSuite(unittest.TestCase):
         self.assertTrue(TestParser.checkParser(input,expect,208))
 
     def test_very_complex_program(self):
-        input = """func main()\n{var a int = 100;\na := a * 100 -200 + 4.5 - "string\\n";}"""
+        input = """func main()   {var a int = 100\na := a * 100 -200 + 4.5 - "string\\n"\n}"""
         expect = "successful"
         self.assertTrue(TestParser.checkParser(input,expect,209))
+
+    def test_replacing_semicolon(self):
+        input = """func main() {if (a * 100 -200 == b/c){fmt.print(dbv);}}"""
+        expect = "successful"
+        self.assertTrue(TestParser.checkParser(input,expect,210))
+
+'''
+        input = """ """
+        expect = ""
+        self.assertTrue(TestParser.checkParser(input,expect,211))
+'''
