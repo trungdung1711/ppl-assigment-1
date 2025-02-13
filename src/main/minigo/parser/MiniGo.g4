@@ -209,11 +209,18 @@ ID                     : (LETTER | UNDERSCORE) (LETTER | DIGIT | UNDERSCORE)*;
     fragment UNDERSCORE     : '_' ;
 
 // Comments
-SINGLE_LINE_COMMENT : '//' ~[\r\n]* ->          skip ;
-MULTI_LIME_COMMENT  :  '/*'   '*/'  ->           skip;
+SINGLE_LINE_COMMENT : '//' ~[\r\n]*                             -> skip;
+// first version: MULTI_LIME_COMMENT  :  '/*' .*? '*/';             --- Dont support nested comment
+// second version: NON-GREEDY
+//        + if nested many times and correctly    --- Only one token
+//        + Can allow multiple multi-line comment, each with nested and doesn't cause problem
+//        + Can handle the case of /* com/*ment */
+//        + Have the same behaviour as real Go: /* com*/ment */
+//        + Can handle this one: /* com/*/**/*/ment */
+MULTI_LIME_COMMENT  :  '/*' (MULTI_LIME_COMMENT | .)*? '*/'     -> skip;
 
 // blanks, tabs, formfeeds, carriage returns and newlines
-WHITESPACE          : [ \t\f\r]+    -> skip ;
+WHITESPACE          : [ \t\f\r]+                                -> skip ;
 
 // NOTE
 /*
