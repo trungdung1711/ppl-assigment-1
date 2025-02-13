@@ -209,8 +209,8 @@ ID                     : (LETTER | UNDERSCORE) (LETTER | DIGIT | UNDERSCORE)*;
     fragment UNDERSCORE     : '_' ;
 
 // Comments
-SINGLE_LINE_COMMENT : '//' ~[\r\n]* -> skip ;
-MULTI_LIME_COMMENT  :  '/*' (MULTI_LIME_COMMENT | ~[/*])*  '*/' -> skip;
+SINGLE_LINE_COMMENT : '//' ~[\r\n]* ->          skip ;
+MULTI_LIME_COMMENT  :  '/*'   '*/'  ->           skip;
 
 // blanks, tabs, formfeeds, carriage returns and newlines
 WHITESPACE          : [ \t\f\r]+    -> skip ;
@@ -376,6 +376,7 @@ declaration         : constant_declaration  // global things
                             ;
             struct_name             : ID
                                     ;
+            // a non-empty list
             property_declaration_list   : property_declaration property_declaration_list
                                         | property_declaration
                                         ;
@@ -592,6 +593,7 @@ statement           : variable_declaration  // O
                                                             // allowing type deduction
                                                             // Take one part of the array_literal
                                                             // array_literal           : [array_type] (LCB element_array_list RCB)
+                                                            // NOTE: must be corrected
                                                             array_element           : expression                    // which can allow typed array literal
                                                                                     | LCB array_element_list RCB    // allow type deduction
                                                                                     ;
