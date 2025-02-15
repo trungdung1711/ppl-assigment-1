@@ -161,6 +161,7 @@ RB                      : ']' ;
 LCB                     : '{' ;
 RCB                     : '}' ;
 COMMA                   : ',' ;
+// This COLON doesn't have in the separator
 COLON                   : ':' ;
 SEMICOLON               : ';' ;
 
@@ -180,7 +181,8 @@ DECIMAL_INTEGER         : '0' | [1-9] [0-9]* ;
 BINARY_INTEGER          : '0' [bB] [0-1]+ ;
 OCTAL_INTEGER           : '0' [oO] [0-7]+ ;
 HEXA_INTEGER            : '0' [xX] [0-9a-fA-F]+ ;
-FLOATING_POINT          : INTEGER DOT FRACTION? EXPONENT? ;
+// FLOATING_POINT is refering DOT again which is not intuitive
+FLOATING_POINT          : INTEGER '.' FRACTION? EXPONENT? ;
     fragment INTEGER            : DIGIT+ ;
     fragment FRACTION           : DIGIT+ ;
     fragment EXPONENT           : [eE] [+-]? DIGIT+ ;
@@ -344,6 +346,7 @@ else:
     if the sequence of tokens makes sense grammatically.
 */
 
+//                                                        BAD ESCAPE DETECTION
 ILLEGAL_ESCAPE      : '"' (~[\\"\r\n] | ESCAPE_SEQUENCE)* '\\' ~[ntr"\\]
 {
     text = self.text
