@@ -454,45 +454,50 @@ func main() {
         171
     ))
         
-    def test_separa6456wewewtors(self):
+    def test_semicolon_replacement_1(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """x = 5\ny = 10""",
+        """x,=,5,;,y,=,10,<EOF>""",
         172
     ))
              
-    def test_separatof323ferrs(self):
+    def test_semicolon_replacement_2(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """3 + 4\nx = 2""",
+        """3,+,4,;,x,=,2,<EOF>""",
         173
     ))
         
-    def test_separ1221atorerers(self):
+    def test_semicolon_replacement_3(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """var a [2]int = [2]int{1,2}\n""",
+        """var,a,[,2,],int,=,[,2,],int,{,1,,,2,},;,<EOF>""",
         174
     ))
         
-    def test_sepaere2323rerrators(self):
+    def test_semicolon_replacement_4(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """if (100 == 200) {
+    a.field.method()
+    }
+    //Comment""",
+        """if,(,100,==,200,),{,a,.,field,.,method,(,),;,},;,<EOF>""",
         175
     ))
         
-    def test_separ23231aterererors(self):
+    def test_semicolon_replacement_5(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """for !(a==b) {
+    a += 1
+    };""",
+        """for,!,(,a,==,b,),{,a,+=,1,;,},;,<EOF>""",
         176
     ))
         
-    def test_separatere112rerors(self):
+    def test_for_sure(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """ "a" + "b" > "c" """,
+        """"a",+,"b",>,"c",<EOF>""",
         177
     ))
         
