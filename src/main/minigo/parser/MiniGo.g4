@@ -396,7 +396,7 @@ declaration         : constant_declaration  // global things            O
                                 ;
             interface_name          : ID
                                     ;
-            // NOTE: can it be empty list ???
+            // non-empty list of method declaration
             method_declaration_list : method_declaration method_declaration_list
                                     | method_declaration
                                     ;
@@ -477,10 +477,12 @@ statement           : variable_declaration  // O    O
                     ;
     // variable_declaration    : VAR variable_name type? initialisation? statement_end;
     // NOTES
+    // fixing
+    // Comment out the fourth rule, as there must be at least type or initialisation
     variable_declaration    : VAR variable_name type_part initialisation statement_end
                             | VAR variable_name type_part                statement_end
                             | VAR variable_name           initialisation statement_end
-                            | VAR variable_name                          statement_end
+                            // | VAR variable_name                          statement_end
                             ;
         variable_name           : ID
                                 ;
@@ -698,6 +700,7 @@ statement           : variable_declaration  // O    O
     // may not explicitly represented in AST
     // NOTE: adding statement_end???
     // else if list
+    // NOTE can be define as recursive rule
     if_statement            : IF LP boolean_expression RP block                         statement_end
                             | IF LP boolean_expression RP block              else_block statement_end
                             | IF LP boolean_expression RP block else_if_list            statement_end
@@ -722,7 +725,8 @@ statement           : variable_declaration  // O    O
                             | ini_for_statement
                             | range_for_statement
                             ;
-        basic_for_statement     : FOR boolean_expression block statement_end
+        // change to condition for synchronisation
+        basic_for_statement     : FOR condition block statement_end
                                 ;
         // if you want the statement_end to be nothing, then in the same line of [}
         // you would continue to write the program -> no SEMI is inserted

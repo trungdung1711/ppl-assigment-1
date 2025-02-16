@@ -34,14 +34,22 @@ class ParserSuite(unittest.TestCase):
         self.assertTrue(TestParser.checkParser(input,expect,203))
 
 
-    def test_wrong_variable(self):
-        input = """var int\n"""
-        expect = "Error on line 1 col 5: int"
+    def test_the_fourth_case_of_variable_declaration(self):
+        input = """func main() {
+            var variable;
+            // There is no type or initialisation in this case
+        };"""
+        expect = "Error on line 2 col 25: ;"
         self.assertTrue(TestParser.checkParser(input,expect,204))
 
 
-    def test_wrong_index(self):
-        input = """var i\n"""
+    def test_3_cases_of_variable_declaration(self):
+        input = """func main() {
+            var a = [3]int{1,2,3}
+            var b int;
+            var c string = "This is a string \\t"
+            return a + b + c
+        };"""
         expect = "successful"
         self.assertTrue(TestParser.checkParser(input,expect,205))
     
@@ -169,7 +177,7 @@ func add(a, b float) {
         self.assertTrue(TestParser.checkParser("""
                                     func something() {
                                         ab += "string\\\\";
-                                        ab -= a[2].b().c().d().e();
+                                        ab -= a[2].b().c().d().e().f(----e).method(a[1])[1][1][1][1];
                                         ab /= 2.0e34
                                         ab *= 2.
                                         ab %= 0.2E89;       
@@ -1073,61 +1081,156 @@ func main() {
         self.assertTrue(TestParser.checkParser(input,expect,290))
 
 
-    def test_hkjdkfghhgdjfhk(self):
-        input = """const a = 10;"""
+    def test_correct_array_literal(self):
+        input = """var arr [2][2]Something = [2][2]Something{{Something{a : 10}, Something{a : 20}}, {Something{a:30}, Something{a:40}}};"""
         expect = "successful"
         self.assertTrue(TestParser.checkParser(input,expect,291))
 
 
-    def test_hkjdkh3452gdjfhk(self):
-        input = """const a = 10;"""
-        expect = "successful"
+    def test_array_literal_contains_another_array_literal_but_not_in_the_type_infer_case(self):
+        input = """func (c Calculator) array() boolean {
+            const arr = [2][2]int{[2]int{1,2},[2]int{3,4}}
+            return arr;
+        };"""
+        expect = "Error on line 2 col 35: ["
         self.assertTrue(TestParser.checkParser(input,expect,292))
 
 
-    def test_hkjdkhgdj45fhk(self):
-        input = """const a = 10;"""
+    def test_array_literal_contain_only_literal(self):
+        input = """const a = 10
+        const b = 20
+        const c = 30
+        func add (a,b,c int, d,e string) {
+            var array = [5]string{"string", "abcd", "efd", "\\t\\n\\r\\\\\\""}
+            return printArray(array);
+        };"""
         expect = "successful"
         self.assertTrue(TestParser.checkParser(input,expect,293))
 
 
-    def test_hkjdkhgd6jfhk(self):
-        input = """const a = 10;"""
+    def test_struct_literal_which_can_be_empty(self):
+        input = """func main() {
+            var b1 Book = Book {n : 1000, a : "JK"}
+            var b2 Book = Book {n : 2000, a : "Dung"}
+            var b3      = Book {}
+            foo()[2] := 2;
+            a.b.d.c.d.d.d.f.d.e.r.f.g.foo(a,c,d,v,g)[1][2][3] := 10283 * 283745 /78474 % 234
+            return b1.getPage() + b2.getPage() + b3.getPage()
+        }
+        
+        type Book struct {
+            n int;
+            a string;
+        }
+        """
         expect = "successful"
         self.assertTrue(TestParser.checkParser(input,expect,294))
 
 
-    def test_hkjdk45hgdjfhk(self):
-        input = """const a = 10;"""
+    def test_interface_with_method_declaration_return_type(self):
+        input = """type AI interface {
+            SolveProblem(p Problem) boolean;
+            TalkAboutLife(topic string) string
+            SearchInfor(search string) [10]string;
+            DoCommand(command string) boolean;
+            AutoDestroy(on boolean) boolean 
+        };"""
         expect = "successful"
         self.assertTrue(TestParser.checkParser(input,expect,295))
 
 
-    def test_hkjdkhg33djfhk(self):
-        input = """const a = 10;"""
+    def test_case_sentisive_for_if_else(self):
+        input = """func doing(If int) int{
+            if (If == 1) {
+                return If
+            } else {
+                var Else int = 2 * If
+                return doing(Else);
+            }
+        }
+        """
         expect = "successful"
         self.assertTrue(TestParser.checkParser(input,expect,296))
 
 
-    def test_hkjdkhgdjf4hk(self):
-        input = """const a = 10;"""
+    def test_chained_if_else_statement(self):
+        input = """const PI = 3.1415;
+            func main() {
+                var i int = getInt();
+
+                if (i < 0) {
+                    for i := 0 ; i < 100 ; i += 1 {
+                        var util Util = Util{advanced : true};
+                        util.print(i)
+
+                        if (i == 20) {
+                            break;
+                        } else if (i == 40) {
+                        continue;
+                        } else if (i == 80) {
+                            return 100 % 34 * i
+                        }
+                    }
+                } else {
+                    continue;
+                }
+
+                return 100;
+            }
+        """
         expect = "successful"
         self.assertTrue(TestParser.checkParser(input,expect,297))
 
 
-    def test_hkjdk3hgdjfhk(self):
-        input = """const a = 10;"""
+    def test_built_in_function_usage(self):
+        input = """type BuiltIn struct {
+            dump int
+        }
+        
+        func (b BuiltIn) calling() bool {
+            var Int int = 100;
+            var Float float = 0.01E-34
+            getInt();
+            putInt(Int)
+            putIntLn(Int);
+            getFloat()
+            putFloat(Float);
+        }
+        """
         expect = "successful"
         self.assertTrue(TestParser.checkParser(input,expect,298))
 
 
-    def test_hkjdkh2gdjfhk(self):
-        input = """const a = 10;"""
-        expect = "successful"
+    def test_for_statement_in_all_statements(self):
+        input = """func main() bool {
+            for _, arr := range a.b.c.d.f.g.e.r[1].foo().coo().a {
+                if (arr != arr.parent()) {
+                    break;
+                }
+                
+                if (arr == arr.children()) {
+                    continue;
+                }
+
+                a();
+                b.a();
+                a[3].foo()[1] := arr
+                return;
+            }
+        }
+        func add(a,b float) {
+            return a + b
+        };"""
+        expect = """successful"""
         self.assertTrue(TestParser.checkParser(input,expect,299))
 
 
-    def test_hkjd1khgdjfhk(self):
-        input = """const a = 10;"""
-        expect = "successful"
+    def test_final_test_case_for_variable_declaration_in_for_loop_init(self):
+        input = """func Add() int {
+                for var i [13]int = 0; foo().a.b(); i[3] += 1 {
+                    break;
+                }
+                return true;
+                    };"""
+        expect = "Error on line 2 col 54: ["
         self.assertTrue(TestParser.checkParser(input,expect,300))
