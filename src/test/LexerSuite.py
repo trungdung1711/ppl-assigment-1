@@ -494,31 +494,33 @@ func main() {
         176
     ))
         
-    def test_for_sure(self):
+    def test_for_sure_hcmut_k22(self):
         self.assertTrue(TestLexer.checkLexeme(
         """ "a" + "b" > "c" """,
         """"a",+,"b",>,"c",<EOF>""",
         177
     ))
         
-    def test_sepwew64earators(self):
+    def test_for_range_statement(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """for var i int = 0; i < 100 ; i := i + 1 {
+            print(i);
+        };""",
+        """for,var,i,int,=,0,;,i,<,100,;,i,:=,i,+,1,{,print,(,i,),;,},;,<EOF>""",
         178
     ))
         
-    def test_sep45arawewewtors(self):
+    def test_unexpected_escape_sequence_in_string_catch_the_first_one(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """var str string = \"string \\m\\d\\e\"""",
+        """var,str,string,=,Illegal escape in string: \"string \\m""",
         179
     ))
         
-    def test_separa78tofferrs(self):
+    def test_unclosed_raw_new_line_inside_string(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """\"this is a string with raw new line\n and something else\"""",
+        """Unclosed string: \"this is a string with raw new line""",
         180
     ))
         

@@ -273,9 +273,6 @@ must_be_replaced_when_before_NEWLINE_set = {
     self.NIL
 }
 if self.previousTokenType in must_be_replaced_when_before_NEWLINE_set:
-    # replace and then skip the NEWLINE
-    # print('replacing')
-
     semicolon_token = self._factory.create(
     self._tokenFactorySourcePair,  # Source info
     self.SEMICOLON,                # Token type
