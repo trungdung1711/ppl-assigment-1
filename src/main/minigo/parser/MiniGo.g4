@@ -49,7 +49,6 @@ options{
 
 // ANTLR prioritizes rules based on order
 
-// NOTE
 /*
     - The @lexer::header section in an ANTLR .g4 file 
     is a special directive used to inject custom code 
@@ -62,7 +61,6 @@ options{
  */
 
 
-// NOTE
 /*
     - Defines custom methods inside the lexer class.
 
@@ -161,6 +159,7 @@ RB                      : ']' ;
 LCB                     : '{' ;
 RCB                     : '}' ;
 COMMA                   : ',' ;
+// This COLON doesn't have in the separator
 COLON                   : ':' ;
 SEMICOLON               : ';' ;
 
@@ -180,7 +179,8 @@ DECIMAL_INTEGER         : '0' | [1-9] [0-9]* ;
 BINARY_INTEGER          : '0' [bB] [0-1]+ ;
 OCTAL_INTEGER           : '0' [oO] [0-7]+ ;
 HEXA_INTEGER            : '0' [xX] [0-9a-fA-F]+ ;
-FLOATING_POINT          : INTEGER DOT FRACTION? EXPONENT? ;
+// FLOATING_POINT is refering DOT again which is not intuitive
+FLOATING_POINT          : INTEGER '.' FRACTION? EXPONENT? ;
     fragment INTEGER            : DIGIT+ ;
     fragment FRACTION           : DIGIT+ ;
     fragment EXPONENT           : [eE] [+-]? DIGIT+ ;
@@ -222,7 +222,6 @@ MULTI_LIME_COMMENT  :  '/*' (MULTI_LIME_COMMENT | .)*? '*/'     -> skip;
 // blanks, tabs, formfeeds, carriage returns and newlines
 WHITESPACE          : [ \t\f\r]+                                -> skip ;
 
-// NOTE
 /*
     How nextToken() works
     - Check If We Are at the End of Input (EOF):
@@ -241,6 +240,7 @@ WHITESPACE          : [ \t\f\r]+                                -> skip ;
 NEWLINE             : '\n'
 {
 # logic to decide whether to skip or replace the NEWLINE with a SEMICOLON token
+# add NIL literal as it can be part of the expression
 must_be_replaced_when_before_NEWLINE_set = {
     # ID
     self.ID,
@@ -268,27 +268,17 @@ must_be_replaced_when_before_NEWLINE_set = {
     # closed token
     self.RP,
     self.RB,
-    self.RCB
+    self.RCB,
+    # nil
+    self.NIL
 }
 if self.previousTokenType in must_be_replaced_when_before_NEWLINE_set:
-    # replace and then skip the NEWLINE
-    # print('replacing')
-
-    semicolon_token = self._factory.create(
-    self._tokenFactorySourcePair,  # Source info
-    self.SEMICOLON,                # Token type
-    ";",                           # Text representation
-    self.DEFAULT_TOKEN_CHANNEL,    # Token channel
-    self._tokenStartCharIndex,     # Start position
-    self._tokenStartCharIndex,     # Stop position
-    self._tokenStartLine,          # Line number
-    self._tokenStartColumn         # Column number
-    )
-
     # set the current token to be semicolon_token   -> emit() -> emitToken()
-    self.emitToken(semicolon_token)
+    self.type = self.SEMICOLON
+    self.text = ';'
+    self.emit()
+    # self.emitToken(semicolon_token)
 else:
-    # print('Ignoring phase')
     self.skip()
 };
 
@@ -344,6 +334,7 @@ else:
     if the sequence of tokens makes sense grammatically.
 */
 
+//                                                        BAD ESCAPE DETECTION
 ILLEGAL_ESCAPE      : '"' (~[\\"\r\n] | ESCAPE_SEQUENCE)* '\\' ~[ntr"\\]
 {
     text = self.text
@@ -365,20 +356,21 @@ ERROR_CHAR          : .
 
 // PARSER RULES
 // Write the grammar using BNF not EBNF
-// A valid program must have something actually
-program             : declaration+ EOF
+program             : declaration_list EOF
                     ;
+    declaration_list    : declaration declaration_list
+                        | declaration
+                        ;
 
 // should not be inside a block
-declaration         : constant_declaration  // global things
-                    | variable_declaration  // global things
-                    | type_declaration      // struct or interface
-                    | function_declaration  // a function
+declaration         : constant_declaration  // global things            O
+                    | variable_declaration  // global things            O
+                    | type_declaration      // struct or interface      O
+                    | function_declaration  // a function               O
                     ;
     type_declaration    : struct_declaration
                         | interface_declaration
                         ;
-        // should this declaration contains statement_end NOTE
         struct_declaration  : TYPE struct_name STRUCT LCB property_declaration_list RCB statement_end
                             ;
             struct_name             : ID
@@ -395,12 +387,12 @@ declaration         : constant_declaration  // global things
                                 ;
             interface_name          : ID
                                     ;
-            // can it be empty list ???
+            // non-empty list of method declaration
             method_declaration_list : method_declaration method_declaration_list
                                     | method_declaration
                                     ;
                 method_declaration      : function_name LP parameter_list RP type_part statement_end
-                                        | function_name LP parameter_list RP statement_end
+                                        | function_name LP parameter_list RP           statement_end
                                         ;
 
     // not the same as C/C++ when the declaration can be separated from function definition
@@ -410,7 +402,8 @@ declaration         : constant_declaration  // global things
                             | method_definition
                             ;
             // NOTE: whether or not, there is a statement end???
-            normal_function_definition  : function_header function_body
+            // just add statement_end
+            normal_function_definition  : function_header function_body statement_end
                                         ;
                 function_header             : FUNC function_name LP parameter_list RP type_part
                                             | FUNC function_name LP parameter_list RP
@@ -424,6 +417,7 @@ declaration         : constant_declaration  // global things
                                                     | parameter
                                                     ;
                             // cause ambiguity, but solved based on ANTLR ordering rule
+                            // NOTE
                             parameter                   : name_type
                                                         | same_type_list
                                                         ;
@@ -438,17 +432,21 @@ declaration         : constant_declaration  // global things
                                                                 ;
                 function_body                   : block
                                                 ;
+                    // No need to add semi??? NOTE
                     block                           : LCB block_member_list RCB
                                                     ;
                         // list of nullable block_member, not separated by something
+                        // NOTE - fixing block not nullable
                         block_member_list               : block_member block_member_list
-                                                        |
+                                                        | block_member
                                                         ;
-                            block_member                    : block
-                                                            | statement
+                            // NOTE: block inside block
+                            // fixing a block member can't be a just raw block {___} -> SEMI is added ->?
+                            block_member                    : statement
+                                                            // | block
                                                             ;
             // NOTE: whether or not, there is a statement end???
-            method_definition           : method_header function_body
+            method_definition           : method_header function_body statement_end
                                         ;
                 method_header               : FUNC LP receiver RP function_name LP parameter_list RP type_part
                                             | FUNC LP receiver RP function_name LP parameter_list RP
@@ -458,21 +456,24 @@ declaration         : constant_declaration  // global things
 
 // it doesn't contain function_declaration, thus a block should have multiple statements
 // check-out list for AST generation
-statement           : variable_declaration  // O
-                    | constant_declaration  // O
-                    | assignment_statement  // O
-                    | if_statement          // O
-                    | for_statement         // O
-                    | break_statement       // O
-                    | continue_statement    // O
-                    | call_statement        // O
-                    | return_statement      // O
+statement           : variable_declaration  // O    O
+                    | constant_declaration  // O    O
+                    | assignment_statement  // O    O
+                    | if_statement          // O    O
+                    | for_statement         // O    O
+                    | break_statement       // O    O
+                    | continue_statement    // O    O
+                    | call_statement        // O    O
+                    | return_statement      // O    O
                     ;
     // variable_declaration    : VAR variable_name type? initialisation? statement_end;
+    // NOTES
+    // fixing
+    // Comment out the fourth rule, as there must be at least type or initialisation
     variable_declaration    : VAR variable_name type_part initialisation statement_end
                             | VAR variable_name type_part                statement_end
                             | VAR variable_name           initialisation statement_end
-                            | VAR variable_name                          statement_end
+                            // | VAR variable_name                          statement_end
                             ;
         variable_name           : ID
                                 ;
@@ -587,22 +588,30 @@ statement           : variable_declaration  // O
                                                                         | FALSE;
                                                 // must always have the [array_type] part
                                                 // but inside, it can be 
-                                                    // expression (in the case of multiple array): allow array_type
-                                                    // not the expression but in the type of LCB
+                                                // expression (in the case of multiple array): allow array_type
+                                                // not the expression but in the type of LCB
+                                                // NOTE: the value inside must be fixed
+                                                // fixing-array_literal can't be nullable
                                                 array_literal           : array_type LCB array_element_list RCB
                                                                         ;
-                                                    array_element_list      : array_element_prime
-                                                                            |
+                                                    array_element_list      : array_element COMMA array_element_list
+                                                                            | array_element
                                                                             ;
-                                                        array_element_prime     : array_element COMMA array_element_prime
-                                                                                | array_element
-                                                                                ;
                                                             // allowing type deduction
                                                             // Take one part of the array_literal
                                                             // array_literal           : [array_type] (LCB element_array_list RCB)
                                                             // NOTE: must be corrected
-                                                            array_element           : expression                    // which can allow typed array literal
-                                                                                    | LCB array_element_list RCB    // allow type deduction
+                                                        array_element           : special_literal                 // which can allow typed array literal
+                                                                                | constant
+                                                                                | LCB array_element_list RCB      // can be seen as another array_literal
+                                                                                ;
+                                                            // there is no array literal
+                                                            special_literal         : integer_literal
+                                                                                    | FLOATING_POINT
+                                                                                    | STRING_LITERAL
+                                                                                    | boolean_literal
+                                                                                    | NIL
+                                                                                    | struct_literal
                                                                                     ;
                                                 struct_literal          : struct_name LCB struct_element_list RCB
                                                                         ;
@@ -617,7 +626,7 @@ statement           : variable_declaration  // O
                                                                 field_name              : ID
                                                                                         ;
         statement_end       : SEMICOLON 
-                            | NEWLINE
+                            // | NEWLINE
                             ;
     // different between Go and C/C++
     // In Go, const means "absolutely immutable and evaluable at compile time."
@@ -680,10 +689,13 @@ statement           : variable_declaration  // O
     // How about the statement_end which enforces the ending of the statement ???
     // must be check again for correct AST generation
     // may not explicitly represented in AST
-    if_statement            : IF LP boolean_expression RP block
-                            | IF LP boolean_expression RP block              else_block
-                            | IF LP boolean_expression RP block else_if_list
-                            | IF LP boolean_expression RP block else_if_list else_block
+    // NOTE: adding statement_end???
+    // else if list
+    // NOTE can be define as recursive rule
+    if_statement            : IF LP boolean_expression RP block                         statement_end
+                            | IF LP boolean_expression RP block              else_block statement_end
+                            | IF LP boolean_expression RP block else_if_list            statement_end
+                            | IF LP boolean_expression RP block else_if_list else_block statement_end
                             ;
         boolean_expression      : expression
                                 ;
@@ -699,14 +711,22 @@ statement           : variable_declaration  // O
             - form with initialization
             - form for iterating over an array
      */
+    // NOTE: add statement_end
     for_statement           : basic_for_statement
                             | ini_for_statement
-                            | range_for_statement;
-        basic_for_statement     : FOR boolean_expression block
+                            | range_for_statement
+                            ;
+        // change to condition for synchronisation
+        basic_for_statement     : FOR condition block statement_end
                                 ;
-        ini_for_statement       : FOR ini SEMICOLON condition SEMICOLON update block
+        // if you want the statement_end to be nothing, then in the same line of [}
+        // you would continue to write the program -> no SEMI is inserted
+        // if you enter -> SEMI, there must be grammar SEMI to catch this as a part 
+        // of the grammar
+        ini_for_statement       : FOR ini SEMICOLON condition SEMICOLON update block statement_end
                                 ;
             // there can be mistake at that point, but I choose to risk
+            // NOTE: omit the declaration in for loop
             ini                     : init_assignment
                                     | init_declaration
                                     ;
@@ -721,7 +741,7 @@ statement           : variable_declaration  // O
                                     ;
             update                  : for_lhs assignment_operator rhs
                                     ;
-        range_for_statement     : FOR index COMMA value_array ASS RANGE array block
+        range_for_statement     : FOR index COMMA value_array ASS RANGE array block statement_end
                                 ;
             index                   : ID
                                     ;   // if it is an UNDERSCORE character -> may be handled in semantic analysis
@@ -747,6 +767,7 @@ statement           : variable_declaration  // O
         function_call_statement     : function_call statement_end
                                     ;
         // problematic
+        // NOTE
         method_call_statement       : expression DOT function_call statement_end
                                     ;
     return_statement            : RETURN expression statement_end

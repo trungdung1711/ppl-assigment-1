@@ -1,1 +1,4 @@
-var int
+func main() {
+            var variable;
+            // There is no type or initialisation in this case
+        };

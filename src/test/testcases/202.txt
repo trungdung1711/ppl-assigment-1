@@ -1,2 +1,8 @@
 func foo () {
+            for (a[5][2].method() && a) || b {
+                var i int = 100.23E+100
+                result := s.killTheEarch(i)
+                s.print(result)
+            }
         }
+        
