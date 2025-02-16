@@ -414,17 +414,13 @@ class LexerSuite(unittest.TestCase):
     def test_program_to_calculate_sub(self):
         self.assertTrue(TestLexer.checkLexeme(
         """func sub(a,b int) {
-return a - b
+return a - b;
 }
 
 func main() {
     // This is the start of the program
-    a := 100
-    b := 200
-
-
-
-    
+    a := 100;
+    b := 200;
     /* c must be -100 */
     var c int = sub(a, b)
 }

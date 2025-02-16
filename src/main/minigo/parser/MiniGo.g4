@@ -401,7 +401,6 @@ declaration         : constant_declaration  // global things            O
         function_definition : normal_function_definition
                             | method_definition
                             ;
-            // NOTE: whether or not, there is a statement end???
             // just add statement_end
             normal_function_definition  : function_header function_body statement_end
                                         ;

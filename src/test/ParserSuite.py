@@ -246,7 +246,7 @@ func main() {
     for i < util.size(ARR) {
         ARR[i] += NUM;
     }
-    util.list(ARR)
+    util.list(ARR);
 };"""
         expect = "successful"
         self.assertTrue(TestParser.checkParser(input,expect,225))
@@ -267,10 +267,10 @@ var c = [4][4]int{{1,2,3,4},{5,6,7,8},{9,10,11,12},{13,14,15,15}}
 //type declaration
 //struct
 type Student struct {
-    name string;
-    age int;
+    name string
+    age int
     HBKK [8]Money
-    ID string;
+    ID string
     friends [N]Student
 }
 
