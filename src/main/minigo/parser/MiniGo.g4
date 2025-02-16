@@ -417,7 +417,6 @@ declaration         : constant_declaration  // global things            O
                                                     | parameter
                                                     ;
                             // cause ambiguity, but solved based on ANTLR ordering rule
-                            // NOTE
                             parameter                   : name_type
                                                         | same_type_list
                                                         ;

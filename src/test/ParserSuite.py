@@ -1233,7 +1233,7 @@ func main() {
                 }
 
                 /*they are literal, which is part of 
-                the expression, thus, it is oke to do so*/
+                the expression, thus, it's oke to do so*/
                 var value int = [5]int{1,2,3,4,5}[0];
                 return true;
                     };"""

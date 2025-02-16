@@ -524,7 +524,7 @@ func main() {
         180
     ))
         
-    '''Adding edge cases for the lexer'''
+    '''Adding edge cases for the lexer - tick'''
         
     def test_floating_point_only_exponent(self):
         self.assertTrue(TestLexer.checkLexeme(
