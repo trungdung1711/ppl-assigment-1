@@ -114,7 +114,7 @@ func add(a, b float) {
     def test_that_i_have_stolen(self):
         self.assertTrue(TestParser.checkParser("""
                                     func Add() {
-                                        for var b [2]ID = (1. + 2.) / 4;  foo().a.b(); i := 1 {
+                                        for var b [2]ID = (1. + 2.e+100) / 4;  foo().a.b(); i := 1 {
                                             return something(); 
                                         }
                                                var list_2D [2][2]int = [2][2] int{{1,2},{3,4}}
@@ -151,7 +151,7 @@ func add(a, b float) {
                   return; 
                 } else if (x == 10) {
                     var z str;
-                } else {
+                } else if (x == 123){
                     var z ID;
                 }
             }
@@ -162,11 +162,11 @@ func add(a, b float) {
         self.assertTrue(TestParser.checkParser("""
             type Calculator interface {
                                         
-                Add(x, y, z int, a float) int;
-                Add(x, y int, a, b, c, d string) int;
-                Reset(a,b  ,c,d int, m int, n float, x,y,z,t string)
+                AddMany(x, y, z int, a float) int;
+                AddAll(x, y int, a, b, c, d string) int;
+                Sub(a,b  ,c,d int, m int, n float, x,y,z,t string)
                                         
-                Hello(name string);
+                Hello_world(name string,a,b,c,d,e float);
                                         
             }
             type Weapon interface {}                                                                       
