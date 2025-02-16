@@ -11,3 +11,4 @@
 /python-test
 **/__pycache__
 /text-test
+/src/test/__pycache__
