@@ -273,21 +273,12 @@ must_be_replaced_when_before_NEWLINE_set = {
     self.NIL
 }
 if self.previousTokenType in must_be_replaced_when_before_NEWLINE_set:
-    semicolon_token = self._factory.create(
-    self._tokenFactorySourcePair,  # Source info
-    self.SEMICOLON,                # Token type
-    ";",                           # Text representation
-    self.DEFAULT_TOKEN_CHANNEL,    # Token channel
-    self._tokenStartCharIndex,     # Start position
-    self._tokenStartCharIndex,     # Stop position
-    self._tokenStartLine,          # Line number
-    self._tokenStartColumn         # Column number
-    )
-
     # set the current token to be semicolon_token   -> emit() -> emitToken()
-    self.emitToken(semicolon_token)
+    self.type = self.SEMICOLON
+    self.text = ';'
+    self.emit()
+    # self.emitToken(semicolon_token)
 else:
-    # print('Ignoring phase')
     self.skip()
 };
 
