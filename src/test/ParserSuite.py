@@ -1220,6 +1220,7 @@ func main() {
         }
         func add(a,b float) {
             return a + b
+            var humanName string = Person{name:"Dung"}.getName();
         };"""
         expect = """successful"""
         self.assertTrue(TestParser.checkParser(input,expect,299))
@@ -1230,6 +1231,10 @@ func main() {
                 for var i [13]int = 0; foo().a.b(); i[3] += 1 {
                     break;
                 }
+
+                /*they are literal, which is part of 
+                the expression, thus, it is oke to do so*/
+                var value int = [5]int{1,2,3,4,5}[0];
                 return true;
                     };"""
         expect = "Error on line 2 col 54: ["

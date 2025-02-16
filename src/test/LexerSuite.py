@@ -524,142 +524,144 @@ func main() {
         180
     ))
         
-    def test_separa323torerers(self):
-        self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
-        181
-    ))
+    '''Adding edge cases for the lexer'''
         
-    def test_sep456aerererrators(self):
+    def test_floating_point_only_exponent(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
-        182
-    ))
+            """e10 E-3""",
+            """e10,E,-,3,<EOF>""",
+            181
+        ))
         
-    def test_separater754ererors(self):
+    def test_floating_point_leading_dot(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
-        183
-    ))
+            """.e3 .E-2""",
+            """.,e3,.,E,-,2,<EOF>""",
+            182
+        ))
         
-    def test_separat3434erererors(self):
+    def test_floating_point_invalid_format(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+            """1.2e+1 3.4E- 5.6e 7.8E+abc""",
+            """1.2e+1,3.4,E,-,5.6,e,7.8,E,+,abc,<EOF>""",
+            183
+        ))
+        
+    def test_string_with_backslash_at_end(self):
+        self.assertTrue(TestLexer.checkLexeme(
+        """ \"Hello\\\" """,
+        """Unclosed string: \"Hello\\\" """,
         184
     ))
         
-    def test_sepwe2323wearators(self):
+    def test_string_with_unescaped_newline(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """ "Hello_\n_World" """,
+        """Unclosed string: \"Hello_""",
         185
     ))
         
-    def test_separ4521454awewewtors(self):
+    def test_error_token(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """& & &""",
+        """ErrorToken &""",
         186
     ))
         
-    def test_sepwe2323wear32ators(self):
+    def test_string_mixed_valid_invalid_escape(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """ \"Valid escape \\n, Illegal escape \\q\" """,
+        """Illegal escape in string: \"Valid escape \\n, Illegal escape \\q""",
         187
     ))
         
-    def test_separ45454awew232ewtors(self):
+    def test_string_unclosed_with_comment_inside_but_there_is_no_close_double_quote(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """ \"This is a string /* with a comment inside */ """,
+        """Unclosed string: "This is a string /* with a comment inside */ """,
         188
     ))
         
-    def test_sepwe2323we334arators(self):
+    def test_comment_followed_by_code_and_auto_semi_replacement(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """/* This is a comment */ var x int = 5\n""",
+        """var,x,int,=,5,;,<EOF>""",
         189
     ))
         
-    def test_separ45454awewe2323wtors(self):
+    def test_identifier_with_special_characters(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """var$abc _var123""",
+        """var,ErrorToken $""",
         190
     ))
         
-    def test_sepwe2323wear2324ators(self):
+    def test_consecutive_operators(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """+++--->>===!==""",
+        """+,+,+,-,-,-,>,>=,==,!=,=,<EOF>""",
         191
     ))
         
-    def test_separ45454awewe454wtors(self):
+    def test_identifiers_and_keywords_mixed(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """ifx ifwhile elifthen thenelse""",
+        """ifx,ifwhile,elifthen,thenelse,<EOF>""",
         192
     ))
         
-    def test_sepwe2323wea12122rators(self):
+    def test_mixed_invalid_hex_and_float(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """0x 1.e+ 0X123E 0xABCDEG 0.0xFFF 0x3.14""",
+        """0,x,1.,e,+,0X123E,0xABCDE,G,0.0,xFFF,0x3,.,14,<EOF>""",
         193
-    ))
+        ))
         
-    def test_separ45454aw35345ewewtors(self):
+    def test_weird_spacing_and_underscore(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """0 x123 0X_ABC 1.2e+_3 3..4E5 6.7_8""",
+        """0,x123,0,X_ABC,1.2,e,+,_3,3.,.,4,E5,6.7,_8,<EOF>""",
         194
-    ))
+        ))
         
-    def test_sepwe232343534wearators(self):
+    def test_hex_and_float_leading_zeroes(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """00x123 0000.1 00.0E10 0X12345.6789 0x00000000000000A""",
+        """0,0x123,0000.1,00.0E10,0X12345,.,6789,0x00000000000000A,<EOF>""",
         195
-    ))
+        ))
         
-    def test_separ4435345454awewewtors(self):
+    def test_exponent_without_mantissa_or_exponent(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """e10 1.e 3.4E+ 2.e- 5.eE10""",
+        """e10,1.,e,3.4,E,+,2.,e,-,5.,eE10,<EOF>""",
         196
-    ))
+        ))
         
-    def test_sepwe2323354354wearators(self):
+    def test_mixed_case_keywords(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """If ELSE FoR RETURN""",
+        """If,ELSE,FoR,RETURN,<EOF>""",
         197
     ))
         
-    def test_separ4534534454awewewtors(self):
+    def test_string_with_escape_sequences(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
-        198
-    ))
+            """ "This is \\\"a test\\nNew line\\tTab\\\\" """,
+            """\"This is \\\"a test\\nNew line\\tTab\\\\\",<EOF>""",
+            198
+        ))
         
-    def test_sepwe2323we65464arators(self):
+    def test_raw_tab_string_still_accepted_as_normal_string_literal(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """\"This is raw tab\t\t\t\t\"""",
+        """\"This is raw tab\t\t\t\t\",<EOF>""",
         199
     ))
         
-    def test_separ45454aw678678ewewtors(self):
+    def test_final_weird_accept_sequence_in_string(self):
         self.assertTrue(TestLexer.checkLexeme(
-        """""",
-        """<EOF>""",
+        """\"This is just a normal\t but then a weird thing happens \\v\\m\\a\"""",
+        """Illegal escape in string: \"This is just a normal\t but then a weird thing happens \\v""",
         200
     ))
