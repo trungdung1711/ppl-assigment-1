@@ -443,6 +443,7 @@ declaration         : constant_declaration  // global things            O
                                                         ;
                             // NOTE: block inside block
                             // fixing a block member can't be a just raw block {___} -> SEMI is added ->?
+                            // CHECK
                             block_member                    : statement
                                                             // | block
                                                             ;
@@ -661,7 +662,7 @@ statement           : variable_declaration  // O    O
             //                         | STRING_LITERAL
             //                         | boolean_literal
             //                         ;
-    assignment_statement    : lhs assignment_operator rhs SEMICOLON
+    assignment_statement    : lhs assignment_operator expression SEMICOLON
                             ;
         // note, we must allow them to be chained together
         // allow expression in []
@@ -696,8 +697,8 @@ statement           : variable_declaration  // O    O
                                 | DIV_ASS
                                 | MOD_ASS
                                 ;
-        rhs                     : expression
-                                ;   // value must be compatible with the type of lhs
+        // rhs                     : expression 2/21/2025
+        //                         ;   // value must be compatible with the type of lhs
     // How about the  which enforces the ending of the statement ???
     // must be check again for correct AST generation
     // may not explicitly represented in AST
@@ -743,7 +744,7 @@ statement           : variable_declaration  // O    O
             ini                     : init_assignment
                                     | init_declaration
                                     ;
-                init_assignment         : ID assignment_operator rhs
+                init_assignment         : ID assignment_operator expression
                                         ;
                     // for_lhs                 : ID 2/25/2025
                     //                         ;
@@ -752,9 +753,9 @@ statement           : variable_declaration  // O    O
                                         ;
             // condition               : expression
             //                         ;
-            update                  : ID assignment_operator rhs
+            update                  : ID assignment_operator expression
                                     ;
-        range_for_statement     : FOR ID COMMA ID ASS RANGE array block SEMICOLON
+        range_for_statement     : FOR ID COMMA ID ASS RANGE expression block SEMICOLON
                                 ;
             // index                   : ID 2/21/2025
             //                         ;   // if it is an UNDERSCORE character -> may be handled in semantic analysis
@@ -763,8 +764,8 @@ statement           : variable_declaration  // O    O
             // should be defined as expression
             // element access
             // return from function
-            array                   : expression
-                                    ;
+            // array                   : expression 2/21/2025
+            //                         ;
                                 // inside the for_statement handled by semantic analysis (context stack)
     // MAP
     break_statement             : BREAK SEMICOLON
