@@ -472,9 +472,9 @@ statement           : variable_declaration  // O    O
     // NOTES
     // fixing
     // Comment out the fourth rule, as there must be at least type or initialisation
-    variable_declaration    : VAR ID type_part initialisation SEMICOLON
-                            | VAR ID type_part                SEMICOLON
-                            | VAR ID           initialisation SEMICOLON
+    variable_declaration    : VAR ID type_part EQUAL expression SEMICOLON
+                            | VAR ID type_part                  SEMICOLON
+                            | VAR ID           EQUAL expression SEMICOLON
                             // | VAR ID                          
                             ;
         // variable_name           : ID 2/21/2025 replace variable_name -> 
@@ -483,6 +483,7 @@ statement           : variable_declaration  // O    O
                                 | ID                 // can be type of Struct or Interface (user defined)
                                 | array_type
                                 ;
+            // MAP
             primitive_type          : INT
                                     | FLOAT
                                     | BOOLEAN
@@ -510,8 +511,8 @@ statement           : variable_declaration  // O    O
                         // constant                : ID 2/21/2025 replace constant
                         //                         ;
         // value must be computable at compile time
-        initialisation          : EQUAL expression
-                                ;
+        // initialisation          : EQUAL expression 2/21/2025
+        //                         ;
             expression              : expression OR ex1
                                     | ex1
                                     ;
@@ -746,8 +747,8 @@ statement           : variable_declaration  // O    O
                                         ;
                     // for_lhs                 : ID 2/25/2025
                     //                         ;
-                init_declaration        : VAR ID type_part initialisation
-                                        | VAR ID           initialisation
+                init_declaration        : VAR ID type_part EQUAL expression
+                                        | VAR ID           EQUAL expression
                                         ;
             // condition               : expression
             //                         ;
