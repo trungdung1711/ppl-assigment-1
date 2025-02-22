@@ -931,7 +931,10 @@ func main() {
                             continue;
                         } else if ( 1 == 00.00) {
                             foo()
+                        } else {
+                            a[1][2][3][4] := 4
                         }
+                    
                           };"""
         expect = "successful"
         self.assertTrue(TestParser.checkParser(input,expect,280))
@@ -1038,6 +1041,9 @@ func main() {
             func (h MyHouse) build() House {
             x := (y := 5) + 10;
             return true;
+            if (a == b) {
+                a := 4
+            }
             }
         """
         expect = "Error on line 13 col 21: :="
@@ -1103,6 +1109,20 @@ func main() {
         func add (a,b,c int, d,e string) {
             var array = [5]string{"string", "abcd", "efd", "\\t\\n\\r\\\\\\""}
             return printArray(array);
+            if (a == b) {
+            a := 5
+            } else if (a == 4) {
+            a := 8
+            } else if (a == 10) {
+            a := 2837
+            };
+
+            if (a == 8) {
+                print(a);
+
+            } else {
+                a[1][2][3][4] += 9
+            }
         };"""
         expect = "successful"
         self.assertTrue(TestParser.checkParser(input,expect,293))
