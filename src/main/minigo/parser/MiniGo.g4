@@ -579,12 +579,11 @@ statement           : variable_declaration  // O    O
                                                     argument_list           : argument_prime
                                                                             | 
                                                                             ;
-                                                        // CHECK
-                                                        argument_prime          : expression COMMA argument_prime
-                                                                                | expression
+                                                        argument_prime          : argument COMMA argument_prime
+                                                                                | argument
                                                                                 ;
-                                                            // argument                : expression 2/21/2025
-                                                            //                         ;
+                                                            argument                : expression
+                                                                                    ;
                                             literal                 : integer_literal
                                                                     | FLOATING_POINT
                                                                     | STRING_LITERAL
@@ -700,22 +699,27 @@ statement           : variable_declaration  // O    O
         //                         ;
         // 2/25/2024 fixing the lhs rule for alignment with the AST
         // more specific case of the lhs
+        // MAP
         lhs                     : field_access
                                 | array_index
                                 | ID
                                 ;
+            // MAP in expression, we would have to map again
             field_access            : expression DOT ID
                                     ;
+            // MAP
             array_index             : expression index_list
                                     ;
+                // MAP
                 index_list              : index index_list
                                         | index
                                         ;
+                // MAP
                 index                   : LB expression RB
                                         ;
             // scalar_variable         : ID 2/21/2025
             //                         ;
-        assignment_operator     : ASS       
+        assignment_operator     : ASS
                                 // the only operator, that can be changed from assignment to declaration
                                 | ADD_ASS
                                 | SUB_ASS
@@ -731,26 +735,31 @@ statement           : variable_declaration  // O    O
     // NOTE: adding ???
     // else if list
     // NOTE can be define as recursive rule
-    // CHECK
+    // CHECK - 2/25/2025 - modify if_statement for AST structure, solving the
+    // SEMI at the end of the if_statement
+    // MAP
     if_statement            : IF LP expression RP block else_part SEMICOLON
                             | IF LP expression RP block           SEMICOLON
                             // | IF LP expression RP block             SEMICOLON
                             // | IF LP expression RP block   SEMICOLON
                             ;
+        // same as if_statement but doesn't have SEMI at the end -> allow recursive in else part
+        // MAP
         if_statement_recursive  : IF LP expression RP block else_part
                                 | IF LP expression RP block
                                 ;
+        // MAP
         else_part               : ELSE if_statement_recursive
                                 | ELSE block
                                 ;
         // boolean_expression      : expression 2/21/2025
         //                         ;
-        else_if_list            : else_if else_if_list | else_if 
-                                ;
-            else_if                 : ELSE IF LP expression RP block
-                                    ;
-        else_block                  : ELSE block
-                                ;
+        // else_if_list            : else_if else_if_list | else_if 
+        //                         ;
+            // else_if                 : ELSE IF LP expression RP block 2/25/2025 moving to use if_statement_recursive
+            //                         ;                                         to align the AST structure
+        // else_block                  : ELSE block
+        //                             ;
     /*
         for statement: 
             - basic form
@@ -809,6 +818,9 @@ statement           : variable_declaration  // O    O
     // but they are not part of expressions. 
     // This means the parser must recognize them without relying on 
     // the normal expression grammar.
+    
+    // CHECK, must create the same FuncCall and MethCall
+    // with expression -> need modify to be unified in AST
     call_statement              : function_call_statement
                                 | method_call_statement
                                 ;
