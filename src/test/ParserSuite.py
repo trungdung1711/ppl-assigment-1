@@ -220,7 +220,7 @@ func add(a, b float) {
 
     def test_array_literal(self):
         input = """
-const NAME = [2]Name{A,B,C,{1,2,3,0b001},Student{name: "Trung Dung", ID: "2210573"},"string"};"""
+const NAME = [2]Name{3.2,4.5,{1,2,3,0b101},{1,2,3,0b001},Student{name: "Trung Dung", ID: "2210573"},"string"};"""
         expect = "successful"
         self.assertTrue(TestParser.checkParser(input,expect,223))
 

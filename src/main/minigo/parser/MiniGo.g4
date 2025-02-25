@@ -499,6 +499,8 @@ statement           : variable_declaration  // O    O
             // - only allow integer_literal and constant only
             // - different from array indexing in expression actually
             // MAP
+            // should be recursively defined, as like Go
+            // CHECK
             array_type              : dimension_list primitive_type 
                                     | dimension_list ID
                                     ;
@@ -613,9 +615,9 @@ statement           : variable_declaration  // O    O
                                                             // allowing type deduction
                                                             // Take one part of the array_literal
                                                             // array_literal           : [array_type] (LCB element_array_list RCB)
-                                                            // NOTE: must be corrected
+                                                            // CHECK!
                                                         array_element           : special_literal                 // which can allow typed array literal
-                                                                                | ID
+                                                                                // | ID                           // Just contain PrimLit (only), not ID
                                                                                 | LCB array_element_list RCB      // can be seen as another array_literal
                                                                                 ;
                                                             // there is no array literal
@@ -626,14 +628,18 @@ statement           : variable_declaration  // O    O
                                                                                     | NIL
                                                                                     | struct_literal
                                                                                     ;
+                                                // MAP
                                                 struct_literal          : ID LCB struct_element_list RCB
                                                                         ;
+                                                    // MAP
                                                     struct_element_list     : struct_element_prime
                                                                             |
                                                                             ;
+                                                        // MAP
                                                         struct_element_prime    : struct_element COMMA struct_element_prime
                                                                                 | struct_element
                                                                                 ;
+                                                            // MAP
                                                             struct_element          : ID COLON expression
                                                                                     ;
                                                                 // field_name              : ID 2/21/2025 replace field_name
@@ -685,9 +691,9 @@ statement           : variable_declaration  // O    O
         //                         | lhs LB expression RB
         //                         | scalar_variable
         //                         ;
-        // CHECK
         lhs                     : expression DOT ID
                                 // CHECK list [ expression ]
+                                // for array index
                                 | expression LB expression RB
                                 | ID
                                 ;
