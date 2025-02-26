@@ -395,8 +395,8 @@ declaration         : constant_declaration  // global things            O
             prototype_list          : prototype prototype_list
                                     | prototype
                                     ;
-                prototype               : ID LP parameter_list RP type_part SEMICOLON
-                                        | ID LP parameter_list RP           SEMICOLON
+                prototype               : ID LP field_list RP type_part SEMICOLON
+                                        | ID LP field_list RP           SEMICOLON
                                         ;
 
     // not the same as C/C++ when the declaration can be separated from function definition
@@ -406,14 +406,31 @@ declaration         : constant_declaration  // global things            O
     function_declaration: func_declaration
                         | method_declaration
                         ;
-        func_declaration            : FUNC ID LP parameter_list RP type_part block SEMICOLON
-                                    | FUNC ID LP parameter_list RP           block SEMICOLON
+        func_declaration            : FUNC ID LP field_list RP type_part block SEMICOLON
+                                    | FUNC ID LP field_list RP           block SEMICOLON
                                     ;
                     // function_name               : ID 2/21/2025 replace function_name
                     //                             ;
-            parameter_list              : parameter_prime
-                                        | 
+            // 2/26/2025 -> fixing parameter_list to align with real Go
+            // field list
+            // parameter_list              : parameter_prime
+            //                             | 
+            //                             ;
+            // 2/26/2025 -> replace parameter_list with field_list -> more like Go
+            field_list                  : field_prime
+                                        |
                                         ;
+                field_prime             : field COMMA field_prime
+                                        | field
+                                        ;
+                    field                   : name_list type_part
+                                            ;
+                        // as like in Go's AST tree when each ast.Field contain
+                        //------Name : list of pointer ast.Ident
+                        //------Type : pointer ast.Ident
+                        name_list               : ID COMMA name_list
+                                                | ID
+                                                ;
                 parameter_prime             : parameter COMMA parameter_prime
                                             | parameter
                                             ;
@@ -423,9 +440,9 @@ declaration         : constant_declaration  // global things            O
                                                 ;
                         same_type_list          : name_list type_part
                                                 ;
-                            name_list               : ID COMMA name_list
-                                                    | ID
-                                                    ;
+                            // name_list               : ID COMMA name_list
+                            //                         | ID 2/26/2025 -> comment this redundant rule
+                            //                         ;
                                         // name                    : ID 2/21/2025 replace name ->
                                         //                         ;
                     name_type                   : ID type_part
@@ -441,8 +458,8 @@ declaration         : constant_declaration  // global things            O
             // CHECK
             // 2/26/2025 fixing long rule -> short rule and more specific to be easier to create AST node
             // and align with the AST teacher's structure
-        method_declaration          : FUNC LP ID type_part RP ID LP parameter_list RP type_part block SEMICOLON
-                                    | FUNC LP ID type_part RP ID LP parameter_list RP           block SEMICOLON
+        method_declaration          : FUNC LP ID type_part RP ID LP field_list RP type_part block SEMICOLON
+                                    | FUNC LP ID type_part RP ID LP field_list RP           block SEMICOLON
                                     ;
 // it doesn't contain function_declaration, thus a block should have multiple statements
 // check-out list for AST generation
