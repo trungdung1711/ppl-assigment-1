@@ -403,65 +403,47 @@ declaration         : constant_declaration  // global things            O
     // 2/26/2025 fixing the intermediate rule
     // making the function_declaration more correct and align with teacher's AST
     // and prototype in interface declaration
-    function_declaration: function_definition
+    function_declaration: func_declaration
+                        | method_declaration
                         ;
-        function_definition : normal_function_definition
-                            | method_definition
-                            ;
-            // just add 
-            normal_function_definition  : function_header function_body SEMICOLON
-                                        ;
-                function_header             : FUNC ID LP parameter_list RP type_part
-                                            | FUNC ID LP parameter_list RP
-                                            ;
+        func_declaration            : FUNC ID LP parameter_list RP type_part block SEMICOLON
+                                    | FUNC ID LP parameter_list RP           block SEMICOLON
+                                    ;
                     // function_name               : ID 2/21/2025 replace function_name
                     //                             ;
-                    parameter_list              : parameter_prime
-                                                | 
-                                                ;
-                        parameter_prime             : parameter COMMA parameter_prime
-                                                    | parameter
-                                                    ;
+            parameter_list              : parameter_prime
+                                        | 
+                                        ;
+                parameter_prime             : parameter COMMA parameter_prime
+                                            | parameter
+                                            ;
                             // cause ambiguity, but solved based on ANTLR ordering rule
-                            parameter                   : name_type
-                                                        | same_type_list
-                                                        ;
-                                same_type_list          : name_list type_part
-                                                        ;
-                                    name_list               : ID COMMA name_list
-                                                            | ID
-                                                            ;
+                    parameter                   : name_type
+                                                | same_type_list
+                                                ;
+                        same_type_list          : name_list type_part
+                                                ;
+                            name_list               : ID COMMA name_list
+                                                    | ID
+                                                    ;
                                         // name                    : ID 2/21/2025 replace name ->
                                         //                         ;
-                                name_type                   : ID type_part
-                                                                ;
-                // CHECK
-                function_body                   : block
-                                                ;
-                    // No need to add semi??? NOTE
-                    block                           : LCB block_member_list RCB
+                    name_type                   : ID type_part
                                                     ;
-                        // list of nullable block_member, not separated by something
-                        // NOTE - fixing block not nullable
-                        block_member_list               : block_member block_member_list
-                                                        | block_member
-                                                        ;
-                            // NOTE: block inside block
-                            // fixing a block member can't be a just raw block {___} -> SEMI is added ->?
-                            // CHECK
-                            block_member                    : statement
-                                                            // | block
-                                                            ;
+            block                           : LCB block_member_list RCB
+                                            ;
+                block_member_list               : block_member block_member_list
+                                                | block_member
+                                                ;
+                    block_member                    : statement
+                                                    ;
             // NOTE: whether or not, there is a statement end???
             // CHECK
-            method_definition           : method_header function_body SEMICOLON
-                                        ;
-                method_header               : FUNC LP receiver RP ID LP parameter_list RP type_part
-                                            | FUNC LP receiver RP ID LP parameter_list RP
-                                            ;
-                    receiver                    : ID type_part
-                                                ; 
-
+            // 2/26/2025 fixing long rule -> short rule and more specific to be easier to create AST node
+            // and align with the AST teacher's structure
+        method_declaration          : FUNC LP ID type_part RP ID LP parameter_list RP type_part block SEMICOLON
+                                    | FUNC LP ID type_part RP ID LP parameter_list RP           block SEMICOLON
+                                    ;
 // it doesn't contain function_declaration, thus a block should have multiple statements
 // check-out list for AST generation
 statement           : variable_declaration  // O    O
