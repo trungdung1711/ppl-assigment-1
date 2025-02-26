@@ -385,19 +385,24 @@ declaration         : constant_declaration  // global things            O
                                             ;
                     // property_name               : ID 2/21/2025 -> replace property_name
                     //                             ;
-        interface_declaration   : TYPE ID INTERFACE LCB method_declaration_list RCB SEMICOLON
+        // CHECK - should rename for AST alignment
+        // 2/26/2025 fixing the name for AST alignment
+        interface_declaration   : TYPE ID INTERFACE LCB prototype_list RCB SEMICOLON
                                 ;
             // interface_name          : ID 2/21/2025 -> replace interface_name
             //                         ;
             // non-empty list of method declaration
-            method_declaration_list : method_declaration method_declaration_list
-                                    | method_declaration
+            prototype_list          : prototype prototype_list
+                                    | prototype
                                     ;
-                method_declaration      : ID LP parameter_list RP type_part SEMICOLON
+                prototype               : ID LP parameter_list RP type_part SEMICOLON
                                         | ID LP parameter_list RP           SEMICOLON
                                         ;
 
     // not the same as C/C++ when the declaration can be separated from function definition
+    // 2/26/2025 fixing the intermediate rule
+    // making the function_declaration more correct and align with teacher's AST
+    // and prototype in interface declaration
     function_declaration: function_definition
                         ;
         function_definition : normal_function_definition
@@ -480,6 +485,7 @@ statement           : variable_declaration  // O    O
                             ;
         // variable_name           : ID 2/21/2025 replace variable_name -> 
         //                         ;
+        // MAP
         type_part               : primitive_type     // representing type of variable
                                 | ID                 // can be type of Struct or Interface (user defined)
                                 | array_type
@@ -574,16 +580,8 @@ statement           : variable_declaration  // O    O
                                             // call                    : function_call 2/25/2025 -> removing unused parser rule
                                             //                         // | method_call - already represented by DOT operator
                                             //                         ;
-                                                function_call           : ID LP argument_list RP
-                                                                        ;
-                                                    argument_list           : argument_prime
-                                                                            | 
-                                                                            ;
-                                                        argument_prime          : argument COMMA argument_prime
-                                                                                | argument
-                                                                                ;
-                                                            argument                : expression
-                                                                                    ;
+                                                // function_call           : ID LP argument_list RP - 2/25/2025 remove function_call
+                                                //                         ; -> making it embedded into other rules for intuition
                                             literal                 : integer_literal
                                                                     | FLOATING_POINT
                                                                     | STRING_LITERAL
@@ -821,16 +819,30 @@ statement           : variable_declaration  // O    O
 
     // CHECK, must create the same FuncCall and MethCall
     // with expression -> need modify to be unified in AST
+    // MAP
     call_statement              : function_call_statement
                                 | method_call_statement
                                 ;
+        // MAP
         function_call_statement     : ID LP argument_list RP SEMICOLON
                                     // function_call SEMICOLON - 2/25/2025 deleting intermediate rule
                                     ;
+            // MAP
+            argument_list           : argument_prime
+                                    | 
+                                    ;
+                // MAP
+                argument_prime          : argument COMMA argument_prime
+                                        | argument
+                                        ;
+                    // MAP
+                    argument                : expression
+                                            ;
         // problematic
         // NOTE
         // grammartically prevent weird expression
         // but unified CallExpr
+        // MAP
         method_call_statement       : expression DOT ID LP argument_list RP SEMICOLON
                                     // expression DOT function_call SEMICOLON - 2/25/2025 deleting intermediate rule
                                     ;
