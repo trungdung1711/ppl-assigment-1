@@ -463,11 +463,14 @@ declaration         : constant_declaration  // global things            O
                                         //                         ;
                     // name_type                   : ID type_part
                     //                                 ;
+            // MAP
             block                           : LCB block_member_list RCB
                                             ;
+                // MAP
                 block_member_list               : block_member block_member_list
                                                 | block_member
                                                 ;
+                    // MAP
                     block_member                    : statement
                                                     ;
             // NOTE: whether or not, there is a statement end???
@@ -480,6 +483,7 @@ declaration         : constant_declaration  // global things            O
                                     ;
 // it doesn't contain function_declaration, thus a block should have multiple statements
 // check-out list for AST generation
+// MAP
 statement           : variable_declaration  // O    O
                     | constant_declaration  // O    O
                     | assignment_statement  // O    O
@@ -494,6 +498,7 @@ statement           : variable_declaration  // O    O
     // NOTES
     // fixing
     // Comment out the fourth rule, as there must be at least type or initialisation
+    // MAP
     variable_declaration    : VAR ID type_part EQUAL expression SEMICOLON
                             | VAR ID type_part                  SEMICOLON
                             | VAR ID           EQUAL expression SEMICOLON
@@ -541,15 +546,19 @@ statement           : variable_declaration  // O    O
         // value must be computable at compile time
         // initialisation          : EQUAL expression 2/21/2025
         //                         ;
+            // MAP
             expression              : expression OR ex1
                                     | ex1
                                     ;
+                // MAP
                 ex1                     : ex1 AND ex2
                                         | ex2 
                                         ;
+                    // MAP
                     ex2                     : ex2 relational_operator ex3
                                             | ex3
                                             ;
+                        // MAP
                         relational_operator     : DOUBLE_EQUAL
                                                 | NOT_EQUAL
                                                 | LESS_THAN
@@ -557,22 +566,28 @@ statement           : variable_declaration  // O    O
                                                 | GREATER_THAN
                                                 | GREATER_THAN_OR_EQUAL
                                                 ;
+                        // MAP
                         ex3                     : ex3 binary_add_sub ex4
                                                 | ex4
                                                 ;
+                            // MAP
                             binary_add_sub          : ADD
                                                     | SUB
                                                     ;
+                            // MAP
                             ex4                     : ex4 mul_div_mod ex5
                                                     | ex5
                                                     ;
+                                // MAP
                                 mul_div_mod             : MUL
                                                         | DIV
                                                         | MOD
                                                         ;
+                                // MAP
                                 ex5                     : unary_not_sub ex5
                                                         | ex6
                                                         ;
+                                    // MAP
                                     unary_not_sub           : NOT
                                                             | SUB
                                                             ;
@@ -582,11 +597,19 @@ statement           : variable_declaration  // O    O
                                     // CHECK -> create MethCall
                                     // 2/25/2025 modify the array access expression to
                                     // follow the AST's structure
+                                    // AST unification happens at this state
+                                    // with the LHS and expression
+                                    // ArrayCell
+                                    // FieldAccess
+                                    // MethCall
+                                    // MAP
                                     ex6                     : ex6 index_list                     // array access
                                                             | ex6 DOT ID LP argument_list RP     // with the receiver before the DOT operator
                                                             | ex6 DOT ID                         // 2/25/2025 - deleting intermediate function_call rule
                                                             | ex7                                // at this point -> create MethCall()
                                                             ;
+                                        // function call
+                                        // MAP
                                         ex7                     : literal
                                                                 | ID                        // can be merged and let semantic analysis to handle??
                                                                 | ID LP argument_list RP    // 2/25/2025 - deleting intermediate parser rule
@@ -598,6 +621,7 @@ statement           : variable_declaration  // O    O
                                             //                         ;
                                                 // function_call           : ID LP argument_list RP - 2/25/2025 remove function_call
                                                 //                         ; -> making it embedded into other rules for intuition
+                                            // MAP
                                             literal                 : integer_literal
                                                                     | FLOATING_POINT
                                                                     | STRING_LITERAL
@@ -679,6 +703,7 @@ statement           : variable_declaration  // O    O
     // In C++, const int y = x + 10; is allowed, but x might change later, causing confusion.
     // note about constexpr
     // CHECK
+    // MAP
     constant_declaration    : CONST ID EQUAL expression SEMICOLON;
         // const_name              : ID; 2/21/2025
         // should be a general expression (no need to separate them)
@@ -692,8 +717,22 @@ statement           : variable_declaration  // O    O
             //                         | STRING_LITERAL
             //                         | boolean_literal
             //                         ;
+    // MAP
+    // 2/27/2025 fixing the assignment statement to fit the AST's structure
     assignment_statement    : lhs assignment_operator expression SEMICOLON
                             ;
+        // 2/27/2025 -> there is no reuse part of the
+        // assignment part -> no need for doing that
+        // assignment_part     : lhs assignment_operator expression
+        //                     ;
+        // MAP
+        assignment_operator     : ASS
+                                | ADD_ASS
+                                | SUB_ASS
+                                | MUL_ASS
+                                | DIV_ASS
+                                | MOD_ASS
+                                ;
         // note, we must allow them to be chained together
         // allow expression in []
         // the left hand side is separately defined from the expression
@@ -733,14 +772,6 @@ statement           : variable_declaration  // O    O
                                         ;
             // scalar_variable         : ID 2/21/2025
             //                         ;
-        assignment_operator     : ASS
-                                // the only operator, that can be changed from assignment to declaration
-                                | ADD_ASS
-                                | SUB_ASS
-                                | MUL_ASS
-                                | DIV_ASS
-                                | MOD_ASS
-                                ;
         // rhs                     : expression 2/21/2025
         //                         ;   // value must be compatible with the type of lhs
     // How about the  which enforces the ending of the statement ???
@@ -752,18 +783,21 @@ statement           : variable_declaration  // O    O
     // CHECK - 2/25/2025 - modify if_statement for AST structure, solving the
     // SEMI at the end of the if_statement
     // MAP
-    if_statement            : IF LP expression RP block else_part SEMICOLON
-                            | IF LP expression RP block           SEMICOLON
+    // 2/27/2025 fixing the name of the statement for correct naming, and align with AST
+    if_statement            : if_part SEMICOLON
+                            // | if_part           SEMICOLON
+    //                         | IF LP expression RP block           SEMICOLON
                             // | IF LP expression RP block             SEMICOLON
                             // | IF LP expression RP block   SEMICOLON
+
                             ;
         // same as if_statement but doesn't have SEMI at the end -> allow recursive in else part
         // MAP
-        if_statement_recursive  : IF LP expression RP block else_part
+        if_part                 : IF LP expression RP block else_part
                                 | IF LP expression RP block
                                 ;
         // MAP
-        else_part               : ELSE if_statement_recursive
+        else_part               : ELSE if_part
                                 | ELSE block
                                 ;
         // boolean_expression      : expression 2/21/2025
@@ -781,35 +815,47 @@ statement           : variable_declaration  // O    O
             - form for iterating over an array
      */
     // NOTE: add 
+    // MAP
     for_statement           : basic_for_statement
                             | ini_for_statement
                             | range_for_statement
                             ;
         // change to condition for synchronisation
+        // MAP
         basic_for_statement     : FOR expression block SEMICOLON
                                 ;
         // if you want the  to be nothing, then in the same line of [}
         // you would continue to write the program -> no SEMI is inserted
         // if you enter -> SEMI, there must be grammar SEMI to catch this as a part 
         // of the grammar
-        ini_for_statement       : FOR ini SEMICOLON expression SEMICOLON update block SEMICOLON
+        // 2/27/2025, fixing the for statement for AST's compatibility
+        // 2/2/27/2025, using for_assignment which is the AssignStmt specific in For
+        // MAP
+        ini_for_statement       : FOR ini SEMICOLON expression SEMICOLON for_assignment block SEMICOLON
                                 ;
             // there can be mistake at that point, but I choose to risk
             // NOTE: omit the declaration in for loop
-            ini                     : init_assignment
+            // MAP
+            ini                     : for_assignment
+                                    //init_assignment
                                     | init_declaration
                                     ;
-                init_assignment         : ID assignment_operator expression
+                // 2/27/2025 create a new rule used exclusively in ini_for_statement
+                // ease the creation of AST
+                // MAP
+                for_assignment          : ID assignment_operator expression
                                         ;
                     // for_lhs                 : ID 2/25/2025
                     //                         ;
+                // NOTE
+                // 2/27/2025 may convert it into Assign with lhs ID and rhs Expr
+                // MAP
                 init_declaration        : VAR ID type_part EQUAL expression
                                         | VAR ID           EQUAL expression
                                         ;
             // condition               : expression
             //                         ;
-            update                  : ID assignment_operator expression
-                                    ;
+        // MAP
         range_for_statement     : FOR ID COMMA ID ASS RANGE expression block SEMICOLON
                                 ;
             // index                   : ID 2/21/2025
